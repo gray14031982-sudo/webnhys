@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Life RPG — Cuộc đời là một cuộc phiêu lưu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script>
+(function(){
+  try{
+    var raw = localStorage.getItem('liferpg_v2') || localStorage.getItem('liferpg_v1');
+    var theme = 'light';
+    if(raw){ var d = JSON.parse(raw); if(d && d.settings && d.settings.theme) theme = d.settings.theme; }
+    document.documentElement.setAttribute('data-theme', theme);
+  }catch(e){}
+})();
+</script>
+<style>
+:root{
+  --bg:#F6F1E6;
+  --bg-soft:#EFE7D8;
+  --card:#FFFDF8;
+  --card-2:#FBF4E4;
+  --ink:#2E2A3D;
+  --ink-soft:#6B6478;
+  --border:#E2D6BE;
+  --border-soft:#EAE0C9;
+  --gold:#D9A441;
+  --gold-deep:#B8842A;
+  --sage:#7C9A83;
+  --sage-deep:#5E7C66;
+  --rose:#C97F80;
+  --rose-deep:#A85F60;
+  --sky:#6F92AD;
+  --sky-deep:#4F708B;
+  --plum:#7C6A96;
+  --plum-deep:#5E4F78;
+  --shadow: 0 6px 18px rgba(60, 45, 20, 0.10);
+  --shadow-lg: 0 14px 34px rgba(60, 45, 20, 0.16);
+  --radius-s:10px;
+  --radius-m:16px;
+  --radius-l:22px;
+  --font-display:'Fraunces', serif;
+  --font-body:'Nunito', sans-serif;
+  --danger:#C15B4A;
+  color-scheme: light;
+}
+:root[data-theme="dark"]{
+  --bg:#1C1826;
+  --bg-soft:#231E32;
+  --card:#26212F;
+  --card-2:#2D2739;
+  --ink:#F1EBFA;
+  --ink-soft:#B3A8C7;
+  --border:#3B3450;
+  --border-soft:#332C46;
+  --gold:#E5B655;
+  --gold-deep:#F0C878;
+  --sage:#8FB396;
+  --sage-deep:#A6C9AC;
+  --rose:#D99798;
+  --rose-deep:#E3ABAC;
+  --sky:#89ACC6;
+  --sky-deep:#A2C1D7;
+  --plum:#A491C2;
+  --plum-deep:#BBA9D6;
+  --shadow: 0 6px 18px rgba(0,0,0,0.35);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.45);
+  --danger:#E08272;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  transition:background .3s ease, color .3s ease;
+}
+h1,h2,h3,h4{ font-family:var(--font-display); margin:0; font-weight:600; letter-spacing:.2px; }
+p{margin:0;}
+button{font-family:var(--font-body); cursor:pointer;}
+input,select,textarea{font-family:var(--font-body);}
+::selection{ background:var(--gold); color:#fff; }
+a{color:inherit;}
+
+.app{ display:flex; min-height:100vh; }
+
+/* ---------- Sidebar (desktop) ---------- */
+.sidebar{
+  width:236px; flex-shrink:0; background:var(--card); border-right:1px solid var(--border-soft);
+  padding:22px 16px; display:flex; flex-direction:column; gap:18px; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{ display:flex; align-items:center; gap:10px; padding:0 6px; }
+.brand-badge{ width:38px; height:38px; border-radius:12px; background:linear-gradient(150deg, var(--gold), var(--rose)); display:flex; align-items:center; justify-content:center; font-size:19px; box-shadow: var(--shadow); flex-shrink:0;}
+.brand-text{ display:flex; flex-direction:column; line-height:1.15; }
+.brand-text b{ font-family:var(--font-display); font-size:16.5px; }
+.brand-text span{ font-size:11px; color:var(--ink-soft); letter-spacing:.4px; }
+
+.navlist{ display:flex; flex-direction:column; gap:3px; margin-top:6px; }
+.navlink{
+  display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:var(--radius-s);
+  color:var(--ink-soft); text-decoration:none; font-weight:700; font-size:14px; border:none; background:transparent; text-align:left; width:100%;
+  transition: background .15s ease, color .15s ease;
+}
+.navlink .ic{ font-size:17px; width:20px; text-align:center; }
+.navlink:hover{ background:var(--bg-soft); color:var(--ink); }
+.navlink.active{ background:linear-gradient(90deg, var(--card-2), transparent); color:var(--ink); box-shadow: inset 3px 0 0 var(--gold); }
+
+.side-foot{ margin-top:auto; padding-top:10px; border-top:1px solid var(--border-soft); font-size:11.5px; color:var(--ink-soft); text-align:center; }
+
+/* ---------- Main ---------- */
+.main{ flex:1; min-width:0; padding:26px 30px 100px; max-width:1180px; margin:0 auto; width:100%; }
+.page{ display:none; animation: fadein .35s ease; }
+.page.active{ display:block; }
+@keyframes fadein{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+.pagehead{ display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-bottom:20px; flex-wrap:wrap; }
+.pagehead h1{ font-size:26px; }
+.pagehead .sub{ color:var(--ink-soft); font-size:13.5px; margin-top:4px; }
+
+/* ---------- Top HUD ---------- */
+.hud{
+  background: linear-gradient(135deg, var(--card-2), var(--card));
+  border:1px solid var(--border-soft); border-radius:var(--radius-l); padding:20px 22px;
+  display:flex; align-items:center; gap:22px; box-shadow:var(--shadow); margin-bottom:22px; flex-wrap:wrap;
+}
+.avatar{
+  width:64px; height:64px; border-radius:18px; background:radial-gradient(circle at 30% 25%, var(--gold), var(--plum) 75%);
+  display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow: var(--shadow-lg); flex-shrink:0;
+  border:2px solid var(--card);
+}
+.hud-info{ flex:1; min-width:200px; }
+.hud-toprow{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.hud-name{ font-size:19px; font-weight:700; }
+.lvl-pill{ background:var(--gold); color:#fff; font-weight:800; font-size:12px; padding:3px 10px; border-radius:100px; letter-spacing:.4px; }
+.streak-pill{ background:var(--rose); color:#fff; font-weight:700; font-size:12px; padding:3px 10px; border-radius:100px; }
+.xp-bar-wrap{ position:relative; }
+.xp-bar-track{ height:14px; border-radius:100px; background:var(--bg-soft); border:1px solid var(--border-soft); overflow:hidden; }
+.xp-bar-fill{ height:100%; border-radius:100px; background:linear-gradient(90deg, var(--sage), var(--gold)); transition:width .6s cubic-bezier(.2,.9,.25,1); }
+.xp-bar-label{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-soft); margin-top:5px; font-weight:700; }
+.hud-stats-mini{ display:flex; gap:18px; flex-wrap:wrap; }
+.mini-stat{ text-align:center; min-width:56px; }
+.mini-stat b{ display:block; font-size:16px; }
+.mini-stat span{ font-size:10.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.3px; }
+
+/* ---------- Cards / grid ---------- */
+.grid{ display:grid; gap:16px; }
+.grid-2{ grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); }
+.grid-3{ grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); }
+.card{ background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:18px; box-shadow:var(--shadow); }
+.card h3{ font-size:15.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.card h3 .cnt{ margin-left:auto; font-size:11.5px; color:var(--ink-soft); font-weight:700; background:var(--bg-soft); padding:2px 9px; border-radius:100px; }
+.section-title{ display:flex; align-items:center; gap:9px; margin:26px 0 12px; }
+.section-title h2{ font-size:17px; }
+.section-title .cnt{ font-size:11.5px; color:var(--ink-soft); font-weight:700; background:var(--card-2); padding:2px 9px; border-radius:100px; border:1px solid var(--border-soft); }
+
+/* ---------- Buttons ---------- */
+.btn{ border:none; border-radius:100px; padding:9px 16px; font-weight:800; font-size:13px; display:inline-flex; align-items:center; gap:7px; transition:transform .12s ease, box-shadow .12s ease; }
+.btn:active{ transform:scale(.96); }
+.btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:#fff; box-shadow:0 4px 10px rgba(180,130,30,.3); }
+.btn-sage{ background:linear-gradient(135deg, var(--sage), var(--sage-deep)); color:#fff; box-shadow:0 4px 10px rgba(90,120,95,.28); }
+.btn-ghost{ background:var(--bg-soft); color:var(--ink); border:1px solid var(--border-soft); }
+.btn-danger{ background:var(--danger); color:#fff; }
+.btn-sm{ padding:6px 12px; font-size:12px; }
+.btn:disabled{ opacity:.45; cursor:not-allowed; }
+.iconbtn{ width:32px; height:32px; border-radius:10px; border:1px solid var(--border-soft); background:var(--bg-soft); display:flex; align-items:center; justify-content:center; font-size:14px; }
+
+/* ---------- Quests ---------- */
+.quest-row{
+  display:flex; align-items:center; gap:12px; padding:12px 10px; border-radius:var(--radius-s); border:1px solid var(--border-soft);
+  background:var(--card-2); margin-bottom:9px; position:relative; overflow:hidden;
+}
+.quest-row::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--diff-color, var(--sage)); }
+.quest-check{
+  width:26px; height:26px; border-radius:8px; border:2px solid var(--border); background:var(--card); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:14px; color:transparent;
+}
+.quest-check.done{ background:var(--sage); border-color:var(--sage-deep); color:#fff; }
+.quest-body{ flex:1; min-width:0; }
+.quest-title{ font-weight:800; font-size:14px; }
+.quest-title.done{ text-decoration:line-through; color:var(--ink-soft); }
+.quest-meta{ display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; font-size:11px; color:var(--ink-soft); align-items:center;}
+.tag{ background:var(--bg-soft); border-radius:100px; padding:2px 8px; font-weight:700; }
+.quest-actions{ display:flex; gap:6px; flex-shrink:0; }
+.stars{ letter-spacing:1px; color:var(--gold); }
+
+/* ---------- Stats ---------- */
+.stat-card{ background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:16px; box-shadow:var(--shadow); }
+.stat-top{ display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+.stat-ic{ font-size:20px; }
+.stat-name{ font-weight:800; font-size:14px; flex:1; }
+.stat-val{ font-weight:900; font-size:15px; }
+.stat-track{ height:9px; border-radius:100px; background:var(--bg-soft); overflow:hidden; border:1px solid var(--border-soft); }
+.stat-fill{ height:100%; border-radius:100px; transition:width .5s ease; }
+.stat-foot{ display:flex; justify-content:space-between; margin-top:6px; font-size:10.5px; color:var(--ink-soft); font-weight:700; }
+
+/* ---------- Achievements ---------- */
+.ach-card{ background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:15px; text-align:center; box-shadow:var(--shadow); position:relative; }
+.ach-card.locked{ opacity:.5; filter:grayscale(.6); }
+.ach-badge{ width:52px; height:52px; margin:0 auto 8px; border-radius:50%; background:linear-gradient(150deg, var(--gold), var(--rose)); display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:var(--shadow); }
+.ach-name{ font-weight:800; font-size:13px; }
+.ach-desc{ font-size:11px; color:var(--ink-soft); margin-top:3px; min-height:28px; }
+.ach-date{ font-size:10px; color:var(--sage-deep); margin-top:6px; font-weight:700; }
+
+/* ---------- Rewards ---------- */
+.reward-card{ background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px; }
+.reward-top{ display:flex; align-items:center; gap:10px; }
+.reward-ic{ font-size:24px; }
+.reward-name{ font-weight:800; font-size:14px; flex:1; }
+.reward-desc{ font-size:12px; color:var(--ink-soft); min-height:16px; }
+.reward-cost{ font-weight:900; color:var(--gold-deep); font-size:13px; }
+.reward-foot{ display:flex; align-items:center; justify-content:space-between; margin-top:4px; }
+
+/* ---------- Journey ---------- */
+.journey-path{ display:flex; flex-direction:column; align-items:center; gap:0; padding:20px 0; }
+.journey-node{ display:flex; align-items:center; gap:16px; width:100%; max-width:520px; padding:14px 18px; border-radius:var(--radius-l); background:var(--card); border:1px solid var(--border-soft); box-shadow:var(--shadow); margin-bottom:2px; }
+.journey-node.locked{ opacity:.45; }
+.journey-node.done{ box-shadow:0 0 0 2px var(--sage) inset, var(--shadow); }
+.journey-ic{ font-size:30px; width:52px; height:52px; border-radius:16px; background:var(--card-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.journey-connector{ width:3px; height:26px; background:repeating-linear-gradient(var(--border), var(--border) 6px, transparent 6px, transparent 12px); }
+.journey-title{ font-weight:800; font-size:15px; }
+.journey-req{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+
+/* ---------- Daily check-in ---------- */
+.mood-row{ display:flex; gap:8px; justify-content:space-between; flex-wrap:wrap; }
+.mood-btn{ flex:1; min-width:44px; border:2px solid var(--border-soft); background:var(--card-2); border-radius:14px; padding:10px 4px; font-size:22px; text-align:center; }
+.mood-btn.sel{ border-color:var(--gold); background:var(--card); transform:scale(1.06); box-shadow:var(--shadow); }
+.checklist{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:8px; margin-top:8px;}
+.chk-item{ display:flex; align-items:center; gap:8px; border:1px solid var(--border-soft); border-radius:var(--radius-s); padding:9px 10px; background:var(--card-2); font-size:13px; font-weight:700; }
+.chk-item input{ width:17px; height:17px; accent-color:var(--sage-deep); }
+
+/* ---------- Calendar ---------- */
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-top:10px; }
+.cal-dow{ text-align:center; font-size:10.5px; color:var(--ink-soft); font-weight:800; padding-bottom:2px; }
+.cal-cell{ aspect-ratio:1; border-radius:9px; border:1px solid var(--border-soft); background:var(--card-2); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; font-weight:700; position:relative; cursor:pointer; }
+.cal-cell.empty{ border:none; background:transparent; cursor:default;}
+.cal-cell.has{ background:linear-gradient(150deg, var(--sage), var(--sage-deep)); color:#fff; border-color:transparent; }
+.cal-cell.today{ box-shadow:0 0 0 2px var(--gold); }
+.cal-dot{ font-size:8px; margin-top:1px; }
+
+/* ---------- Forms / modal ---------- */
+.field{ margin-bottom:12px; }
+.field label{ display:block; font-size:12px; font-weight:800; color:var(--ink-soft); margin-bottom:5px; }
+.field input[type=text], .field input[type=number], .field input[type=date], .field select, .field textarea{
+  width:100%; padding:9px 11px; border-radius:var(--radius-s); border:1px solid var(--border); background:var(--bg-soft); color:var(--ink); font-size:13.5px;
+}
+.field textarea{ min-height:60px; resize:vertical; }
+.field-row{ display:flex; gap:10px; }
+.field-row .field{ flex:1; }
+.modal-overlay{ position:fixed; inset:0; background:rgba(20,15,10,.5); display:none; align-items:center; justify-content:center; z-index:200; padding:16px; backdrop-filter:blur(2px); }
+.modal-overlay.open{ display:flex; }
+.modal{ background:var(--card); border-radius:var(--radius-l); padding:22px; width:100%; max-width:420px; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow-lg); border:1px solid var(--border-soft); }
+.modal h3{ font-size:17px; margin-bottom:14px; }
+.modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:16px; }
+
+/* ---------- Toasts ---------- */
+.toast-wrap{ position:fixed; top:16px; right:16px; z-index:400; display:flex; flex-direction:column; gap:8px; max-width:280px; }
+.toast{ background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:11px 14px; box-shadow:var(--shadow-lg); font-size:12.5px; font-weight:700; animation:toastin .3s ease; }
+.toast .tt{ font-weight:900; margin-bottom:2px; }
+.toast .xpline{ color:var(--gold-deep); font-weight:900; }
+@keyframes toastin{ from{opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);} }
+@keyframes toastout{ to{opacity:0; transform:translateX(30px);} }
+
+/* ---------- Level up / achievement overlay ---------- */
+.celebrate-overlay{ position:fixed; inset:0; background:rgba(20,15,10,.55); display:none; align-items:center; justify-content:center; z-index:500; }
+.celebrate-overlay.open{ display:flex; }
+.celebrate-card{ background:var(--card); border-radius:var(--radius-l); padding:34px 30px; text-align:center; box-shadow:var(--shadow-lg); max-width:340px; border:1px solid var(--border-soft); animation:popin .4s cubic-bezier(.2,1.3,.4,1); }
+@keyframes popin{ from{opacity:0; transform:scale(.7);} to{opacity:1; transform:scale(1);} }
+.celebrate-emoji{ font-size:56px; margin-bottom:6px; }
+.celebrate-title{ font-family:var(--font-display); font-size:24px; font-weight:700; margin-bottom:4px; }
+.celebrate-sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:16px; }
+
+/* ---------- Bottom nav (mobile) ---------- */
+.bottomnav{ display:none; }
+
+@media (max-width: 880px){
+  .sidebar{ display:none; }
+  .main{ padding:16px 14px 90px; }
+  .bottomnav{
+    display:flex; position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border-soft);
+    z-index:150; box-shadow:0 -6px 18px rgba(0,0,0,.08); overflow-x:auto;
+  }
+  .bottomnav .navlink{ flex-direction:column; gap:3px; font-size:9.5px; padding:9px 4px; border-radius:0; flex:1; min-width:58px; align-items:center; }
+  .bottomnav .navlink.active{ box-shadow:inset 0 3px 0 var(--gold); background:var(--bg-soft); }
+  .topbar-mobile{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .hud{ padding:16px; gap:14px; }
+  .avatar{ width:52px; height:52px; font-size:24px; }
+}
+@media (min-width:881px){ .topbar-mobile{ display:none; } }
+
+.empty-state{ text-align:center; padding:34px 14px; color:var(--ink-soft); }
+.empty-state .em{ font-size:34px; margin-bottom:8px; }
+
+.confetti-piece{ position:fixed; top:-10px; width:8px; height:14px; z-index:600; pointer-events:none; }
+
+footer.disclaimer{ text-align:center; font-size:11px; color:var(--ink-soft); margin-top:30px; }
+.divider{ height:1px; background:var(--border-soft); margin:18px 0; border:none; }
+.small-note{ font-size:11.5px; color:var(--ink-soft); line-height:1.5; }
+.switch{ position:relative; width:42px; height:24px; flex-shrink:0; }
+.switch input{ opacity:0; width:0; height:0; }
+.slider-t{ position:absolute; inset:0; background:var(--border); border-radius:100px; transition:.2s; }
+.slider-t::before{ content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+input:checked + .slider-t{ background:var(--sage); }
+input:checked + .slider-t::before{ transform:translateX(18px); }
+.settings-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border-soft); gap:14px; }
+.settings-row:last-child{ border-bottom:none; }
+.settings-row .lbl{ font-weight:800; font-size:13.5px; }
+.settings-row .desc{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+.action-config-row{ display:grid; grid-template-columns: 1.6fr .8fr .8fr; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--border-soft); }
+.action-config-row input{ width:100%; padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--bg-soft); color:var(--ink); font-size:12.5px; }
+.chart-svg{ width:100%; height:auto; display:block; }
+.range-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+.range-tab{ padding:6px 13px; border-radius:100px; border:1px solid var(--border-soft); background:var(--card-2); font-weight:700; font-size:12px; }
+.range-tab.active{ background:var(--gold); color:#fff; border-color:transparent; }
+
+/* ---------- Adventure / Board / Dice ---------- */
+.adventure-card{ background:linear-gradient(160deg, var(--card-2), var(--card)); }
+.adventure-head{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.adv-body{ display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start; }
+.board-track{ flex:1; min-width:240px; display:grid; grid-template-columns:repeat(8, 1fr); gap:6px; }
+.board-tile{ aspect-ratio:1; border-radius:10px; border:1px solid var(--border-soft); background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:16px; position:relative; }
+.board-tile.current{ box-shadow:0 0 0 2px var(--gold); background:var(--card-2); }
+.board-tile .bt-idx{ position:absolute; top:2px; left:4px; font-size:8px; color:var(--ink-soft); font-weight:700; }
+.dice-panel{ width:150px; display:flex; flex-direction:column; align-items:center; gap:10px; flex-shrink:0; }
+.dice-face{ width:74px; height:74px; border-radius:16px; background:var(--card); border:2px solid var(--border-soft); display:flex; align-items:center; justify-content:center; font-size:38px; box-shadow:var(--shadow); }
+
+/* ---------- Character / Avatar ---------- */
+.char-tabpanel{ margin-top:6px; }
+.avatar-card{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.avatar-stage{ width:170px; height:170px; border-radius:50%; background:radial-gradient(circle at 32% 26%, var(--card-2), var(--bg-soft) 78%); display:flex; align-items:center; justify-content:center; position:relative; box-shadow:var(--shadow-lg); border:2px solid var(--border-soft); }
+.avatar-base{ font-size:64px; z-index:2; }
+.avatar-badge{ position:absolute; font-size:26px; z-index:3; filter:drop-shadow(0 2px 3px rgba(0,0,0,.2)); }
+.avatar-badge.hair{ top:2px; left:50%; transform:translateX(-50%); }
+.avatar-badge.outfit{ bottom:6px; left:50%; transform:translateX(-50%); }
+.avatar-badge.accessory{ top:36%; right:4px; }
+.avatar-badge.pet{ bottom:4px; left:4px; font-size:22px; }
+.avatar-aura-glow{ position:absolute; inset:-8px; border-radius:50%; z-index:1; pointer-events:none; }
+.equip-slot-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--border-soft); }
+.equip-slot-row:last-child{ border-bottom:none; }
+.equip-slot-row .esn{ font-weight:800; font-size:13px; display:flex; align-items:center; gap:8px; }
+.equip-select{ padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-soft); color:var(--ink); font-size:12.5px; }
+
+/* ---------- Collection ---------- */
+.collection-card{ background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:14px; text-align:center; box-shadow:var(--shadow); }
+.collection-card.locked{ opacity:.5; filter:grayscale(.7); }
+.collection-ic{ font-size:32px; margin-bottom:6px; }
+.collection-name{ font-weight:800; font-size:12.5px; }
+.collection-source{ font-size:10.5px; color:var(--ink-soft); margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">🎮</div>
+      <div class="brand-text"><b>LIFE RPG</b><span>YOUR LIFE. YOUR GAME.</span></div>
+    </div>
+    <div class="navlist" id="navlist"></div>
+    <div class="side-foot">Level up in real life ✨</div>
+  </nav>
+
+  <main class="main">
+    <div class="topbar-mobile">
+      <div class="brand-badge">🎮</div>
+      <div class="brand-text"><b>LIFE RPG</b></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="page" id="page-dashboard">
+      <div class="hud">
+        <div class="avatar" id="hud-avatar">🧙</div>
+        <div class="hud-info">
+          <div class="hud-toprow">
+            <div class="hud-name" id="hud-name">MY CHARACTER</div>
+            <div class="lvl-pill" id="hud-level">LEVEL 1</div>
+            <div class="streak-pill" id="hud-streak">🔥 0 ngày</div>
+          </div>
+          <div class="xp-bar-wrap">
+            <div class="xp-bar-track"><div class="xp-bar-fill" id="hud-xpfill" style="width:0%"></div></div>
+            <div class="xp-bar-label"><span id="hud-xpnow">0 / 100 XP</span><span id="hud-xpleft">100 XP TO NEXT LEVEL</span></div>
+          </div>
+        </div>
+        <div class="hud-stats-mini">
+          <div class="mini-stat"><b id="hud-totalxp">0</b><span>Total XP</span></div>
+          <div class="mini-stat"><b id="hud-spendxp">0</b><span>Spendable</span></div>
+          <div class="mini-stat"><b id="hud-coins">0</b><span>🪙 Coins</span></div>
+          <div class="mini-stat"><b id="hud-days">0</b><span>Days</span></div>
+        </div>
+      </div>
+
+      <div class="grid grid-2" style="margin-bottom:22px;">
+        <div class="card" style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:26px;">💬</span>
+          <div><div class="small-note" style="font-size:11px; text-transform:uppercase; font-weight:800; letter-spacing:.4px;">Hôm nay</div><b id="dash-quote" style="font-family:var(--font-display); font-size:14.5px;"></b></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:8px;">🔔 Nhắc nhở</h3>
+          <div id="dash-notifications" class="small-note" style="display:flex; flex-direction:column; gap:5px;"></div>
+        </div>
+      </div>
+
+      <div class="card adventure-card" style="margin-bottom:22px;">
+        <div class="adventure-head">
+          <h3 style="margin-bottom:0;">🌲 Daily Adventure — Knowledge Forest Trail</h3>
+          <span class="tag" id="adv-rolls-tag">0 lượt tung</span>
+        </div>
+        <p class="small-note" style="margin:8px 0 12px;">Hoàn thành 3 Quest để mở 1 lượt tung xúc xắc · 5 Quest thêm 1 lượt bonus · hoàn thành hết Daily Quest nhận thêm 1 lượt.</p>
+        <div class="adv-body">
+          <div class="board-track" id="board-track"></div>
+          <div class="dice-panel">
+            <div class="dice-face" id="dice-face">🎲</div>
+            <button class="btn btn-gold" id="roll-btn" onclick="rollDice()">Tung xúc xắc</button>
+            <div class="small-note" id="adv-progress-note" style="margin-top:8px; text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><h2>✨ Quick Actions</h2><span class="cnt">nhận XP nhanh</span></div>
+      <div class="grid grid-3" id="dash-quick-actions"></div>
+
+      <div class="section-title"><h2>⚔️ Nhiệm vụ hôm nay</h2><span class="cnt" id="dash-quest-cnt">0</span><button class="btn btn-gold btn-sm" style="margin-left:auto" onclick="openQuestModal()">+ Add Quest</button></div>
+      <div id="dash-quests"></div>
+
+      <div class="section-title"><h2>📊 Chỉ số nhân vật</h2></div>
+      <div class="grid grid-3" id="dash-stats"></div>
+
+      <div class="section-title"><h2>🏆 Thành tựu gần đây</h2></div>
+      <div class="grid grid-3" id="dash-achievements"></div>
+
+      <div class="section-title"><h2>📅 Tóm tắt hôm nay</h2></div>
+      <div class="card" id="dash-today-summary"></div>
+    </section>
+
+    <!-- QUESTS -->
+    <section class="page" id="page-quests">
+      <div class="pagehead">
+        <div><h1>⚔️ Quests</h1><div class="sub">Hoàn thành nhiệm vụ để nhận XP và phát triển chỉ số</div></div>
+        <button class="btn btn-gold" onclick="openQuestModal()">+ Add Quest</button>
+      </div>
+      <div class="range-tabs" id="quest-filter-tabs"></div>
+      <div id="quest-list"></div>
+    </section>
+
+    <!-- CHARACTER -->
+    <section class="page" id="page-character">
+      <div class="pagehead"><div><h1>🧙 Character</h1><div class="sub">Nhân vật, chỉ số và thành tựu của bạn</div></div></div>
+      <div class="range-tabs" id="character-tabs"></div>
+      <div id="character-tab-avatar" class="char-tabpanel">
+        <div class="grid grid-2">
+          <div class="card avatar-card">
+            <div class="avatar-stage" id="avatar-stage"></div>
+            <div style="text-align:center; margin-top:10px;">
+              <b id="avatar-name-display"></b>
+              <div class="small-note" id="avatar-title-display"></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>🎽 Equip Slots</h3>
+            <div id="equip-slots"></div>
+            <p class="small-note" style="margin-top:8px;">Mở khóa thêm vật phẩm ở trang <b>Collection</b> qua Adventure, Achievement và cột mốc Level.</p>
+          </div>
+        </div>
+      </div>
+      <div id="character-tab-stats" class="char-tabpanel" style="display:none;">
+        <div class="grid grid-3" id="stats-full"></div>
+      </div>
+      <div id="character-tab-achievements" class="char-tabpanel" style="display:none;">
+        <div class="grid grid-3" id="ach-full"></div>
+      </div>
+    </section>
+
+    <!-- COLLECTION -->
+    <section class="page" id="page-collection">
+      <div class="pagehead"><div><h1>🎒 Collection</h1><div class="sub">Vật phẩm bạn thu thập được trên hành trình</div></div></div>
+      <div class="range-tabs" id="collection-type-tabs"></div>
+      <div class="grid grid-3" id="collection-list"></div>
+    </section>
+
+    <!-- JOURNEY -->
+    <section class="page" id="page-journey">
+      <div class="pagehead"><div><h1>🗺️ My Journey</h1><div class="sub">Mở khóa từng vùng đất mới trên hành trình phát triển</div></div></div>
+      <div class="journey-path" id="journey-path"></div>
+    </section>
+
+    <!-- DAILY LOG -->
+    <section class="page" id="page-dailylog">
+      <div class="pagehead">
+        <div><h1>📅 Daily Check-in</h1><div class="sub">Ghi lại ngày hôm nay trong 1–3 phút</div></div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>✨ How was your day?</h3>
+          <div class="mood-row" id="mood-row"></div>
+          <div class="field" style="margin-top:14px;">
+            <label>⚡ Năng lượng hôm nay</label>
+            <div class="mood-row" id="energy-row"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Độ khó hôm nay</label>
+              <select id="daily-difficulty"><option value="easy">😌 Dễ dàng</option><option value="normal">🙂 Bình thường</option><option value="hard">😣 Khó khăn</option><option value="veryhard">🥵 Rất khó</option></select>
+            </div>
+          </div>
+          <div class="field"><label>🏅 Thành tựu chính hôm nay</label><input type="text" id="daily-accomplishment" placeholder="Điều bạn tự hào nhất hôm nay là gì?"></div>
+          <div class="field"><label>📝 Ghi chú nhanh</label><textarea id="daily-note" placeholder="Hôm nay thế nào?"></textarea></div>
+          <div class="checklist" id="daily-checklist"></div>
+          <div class="field" style="margin-top:10px;"><label>🙏 Biết ơn / điều tích cực</label><input type="text" id="daily-gratitude" placeholder="Một điều bạn biết ơn hôm nay"></div>
+          <div class="field"><label>🌅 Ghi chú cho ngày mai</label><input type="text" id="daily-tomorrow" placeholder="Điều quan trọng nhất cần làm ngày mai"></div>
+          <button class="btn btn-gold" style="margin-top:6px; width:100%; justify-content:center;" onclick="saveCheckIn()">💾 Save Check-in</button>
+        </div>
+        <div class="card">
+          <h3>🗓️ Lịch sử</h3>
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <button class="iconbtn" onclick="calShift(-1)">‹</button>
+            <b id="cal-month-label"></b>
+            <button class="iconbtn" onclick="calShift(1)">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div id="cal-day-detail" class="small-note" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REWARDS -->
+    <section class="page" id="page-rewards">
+      <div class="pagehead">
+        <div><h1>🎁 Reward Shop</h1><div class="sub">Đổi Spendable XP lấy phần thưởng cho bản thân</div></div>
+        <button class="btn btn-gold" onclick="openRewardModal()">+ Add Reward</button>
+      </div>
+      <div class="card" style="margin-bottom:16px; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:20px;">✨</span><b>Spendable XP: <span id="reward-balance">0</span></b>
+      </div>
+      <div class="grid grid-3" id="reward-list"></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="page" id="page-progress">
+      <div class="pagehead"><div><h1>📈 Progress</h1><div class="sub">Theo dõi sự phát triển của bạn theo thời gian</div></div></div>
+      <div class="range-tabs" id="progress-range-tabs"></div>
+      <div class="grid grid-2">
+        <div class="card"><h3>📈 XP theo thời gian</h3><div id="chart-xp"></div></div>
+        <div class="card"><h3>⚔️ Quest hoàn thành</h3><div id="chart-quests"></div></div>
+      </div>
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card"><h3>🔥 Streaks</h3><div id="progress-streaks"></div></div>
+        <div class="card"><h3>🧮 Tổng quan hoạt động</h3><div id="progress-activity"></div></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <div class="pagehead"><div><h1>⚙️ Settings</h1></div></div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3>👤 Character</h3>
+        <div class="field"><label>Character name</label><input type="text" id="set-name"></div>
+        <button class="btn btn-sage btn-sm" onclick="saveName()">Save name</button>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3>🎨 Appearance</h3>
+        <div class="settings-row"><div><div class="lbl">Dark Mode</div><div class="desc">Chuyển giao diện sáng / tối</div></div>
+          <label class="switch"><input type="checkbox" id="set-dark" onchange="toggleTheme()"><span class="slider-t"></span></label></div>
+        <div class="settings-row"><div><div class="lbl">Animations</div><div class="desc">Hiệu ứng chuyển động nhẹ</div></div>
+          <label class="switch"><input type="checkbox" id="set-anim" onchange="saveToggle('animation')"><span class="slider-t"></span></label></div>
+        <div class="settings-row"><div><div class="lbl">Confetti</div><div class="desc">Hiệu ứng pháo giấy khi Level Up</div></div>
+          <label class="switch"><input type="checkbox" id="set-confetti" onchange="saveToggle('confetti')"><span class="slider-t"></span></label></div>
+        <div class="settings-row"><div><div class="lbl">Sound</div><div class="desc">Âm thanh nhỏ khi hoàn thành</div></div>
+          <label class="switch"><input type="checkbox" id="set-sound" onchange="saveToggle('sound')"><span class="slider-t"></span></label></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3>⚡ Quick Actions</h3>
+        <p class="small-note" style="margin-bottom:8px;">Chỉnh icon, tên, XP, giới hạn/ngày, bật/tắt cho mỗi Quick Action.</p>
+        <div class="action-config-row" style="grid-template-columns:.5fr 1.3fr .7fr .7fr .6fr; font-size:11px; color:var(--ink-soft); font-weight:800;"><span>Icon</span><span>Tên</span><span>XP</span><span>Giới hạn</span><span>Bật</span></div>
+        <div id="action-config-list"></div>
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+          <button class="btn btn-sage btn-sm" onclick="saveActionConfig()">Save changes</button>
+          <button class="btn btn-ghost btn-sm" onclick="restoreDefaultActions()">Restore Defaults</button>
+        </div>
+        <hr class="divider">
+        <p class="small-note" style="margin-bottom:8px;"><b>+ Thêm Quick Action mới</b></p>
+        <div class="field-row">
+          <div class="field" style="flex:0 0 60px;"><label>Icon</label><input type="text" id="new-act-icon" maxlength="2" value="⭐"></div>
+          <div class="field" style="flex:2;"><label>Tên</label><input type="text" id="new-act-name" placeholder="VD: Thiền 5 phút"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>XP</label><input type="number" id="new-act-xp" min="1" value="10"></div>
+          <div class="field"><label>Giới hạn/ngày</label><input type="number" id="new-act-limit" min="0" value="1"></div>
+          <div class="field"><label>Stat liên quan</label><select id="new-act-stat"><option value="">Không</option></select></div>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="addCustomAction()">+ Add Quick Action</button>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3>🏷️ Custom Categories</h3>
+        <p class="small-note" style="margin-bottom:8px;">Thêm category riêng để phân loại Quest ngoài các Stat có sẵn (VD: "Nội trợ", "Dự án cá nhân").</p>
+        <div id="category-config-list" style="margin-bottom:10px;"></div>
+        <div class="field-row" style="align-items:flex-end;">
+          <div class="field" style="flex:0 0 60px;"><label>Icon</label><input type="text" id="new-cat-icon" maxlength="2" value="🏷️"></div>
+          <div class="field" style="flex:2;"><label>Tên category</label><input type="text" id="new-cat-name" placeholder="VD: Dự án cá nhân"></div>
+          <button class="btn btn-gold btn-sm" style="height:38px;" onclick="addCategory()">+ Add</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <h3>💾 Data</h3>
+        <div class="settings-row"><div><div class="lbl">Export Data</div><div class="desc">Tải toàn bộ dữ liệu dưới dạng JSON</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="exportData()">Export</button></div>
+        <div class="settings-row"><div><div class="lbl">Import Data</div><div class="desc">Khôi phục dữ liệu từ file JSON</div></div>
+          <label class="btn btn-ghost btn-sm">Import<input type="file" accept="application/json" style="display:none" onchange="importData(event)"></label></div>
+        <div class="settings-row"><div><div class="lbl">Start Fresh</div><div class="desc">Xóa dữ liệu mẫu, bắt đầu từ Level 1</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="startFresh()">Start Fresh</button></div>
+        <div class="settings-row"><div><div class="lbl">Reset All Data</div><div class="desc">Xóa toàn bộ tiến trình (không thể hoàn tác)</div></div>
+          <button class="btn btn-danger btn-sm" onclick="resetDataStep1()">Reset</button></div>
+      </div>
+
+      <p class="small-note" id="storage-warning" style="display:none; color:var(--danger); font-weight:700;">⚠️ Trình duyệt của bạn không hỗ trợ localStorage — dữ liệu sẽ không được lưu lại.</p>
+    </section>
+
+    <footer class="disclaimer">Life RPG · phiên bản MVP — dữ liệu chỉ được lưu cục bộ (localStorage) trên trình duyệt này. Hãy Export định kỳ trong Settings để sao lưu.</footer>
+  </main>
+</div>
+
+<nav class="bottomnav" id="bottomnav"></nav>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- Quest Modal -->
+<div class="modal-overlay" id="quest-modal">
+  <div class="modal">
+    <h3 id="quest-modal-title">Add Quest</h3>
+    <input type="hidden" id="quest-id">
+    <div class="field"><label>Tên nhiệm vụ</label><input type="text" id="q-name" placeholder="VD: Học 1 tiếng"></div>
+    <div class="field"><label>Mô tả</label><textarea id="q-desc" placeholder="Mô tả ngắn (không bắt buộc)"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Loại</label><select id="q-type"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="longterm">Long-term</option></select></div>
+      <div class="field"><label>Độ khó</label><select id="q-diff" onchange="syncQuestXP()">
+        <option value="1">⭐ Easy</option><option value="2">⭐⭐ Normal</option><option value="3">⭐⭐⭐ Hard</option><option value="4">⭐⭐⭐⭐ Epic</option><option value="5">⭐⭐⭐⭐⭐ Legendary</option>
+      </select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Category / Stat chính</label><select id="q-stat"></select></div>
+      <div class="field"><label>XP</label><input type="number" id="q-xp" min="1" value="20"></div>
+    </div>
+    <div class="field"><label>Deadline (không bắt buộc)</label><input type="date" id="q-deadline"></div>
+    <div class="field"><label>Tài liệu / link tham khảo (không bắt buộc)</label><input type="text" id="q-resource" placeholder="VD: link bài giảng, ghi chú..."></div>
+    <div class="field-row" style="align-items:center;">
+      <div class="field" style="display:flex; align-items:center; gap:8px; margin-bottom:0;">
+        <input type="checkbox" id="q-recurring" style="width:17px;height:17px;">
+        <label style="margin:0;">Lặp lại mỗi ngày (recurring)</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('quest-modal')">Hủy</button>
+      <button class="btn btn-gold" onclick="submitQuest()">Save Quest</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reward Modal -->
+<div class="modal-overlay" id="reward-modal">
+  <div class="modal">
+    <h3>Add Reward</h3>
+    <div class="field"><label>Tên phần thưởng</label><input type="text" id="r-name" placeholder="VD: Xem 1 bộ phim"></div>
+    <div class="field"><label>Mô tả</label><input type="text" id="r-desc" placeholder="Không bắt buộc"></div>
+    <div class="field-row">
+      <div class="field"><label>Icon (emoji)</label><input type="text" id="r-icon" value="🎁" maxlength="4"></div>
+      <div class="field"><label>Chi phí (XP)</label><input type="number" id="r-cost" min="1" value="100"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('reward-modal')">Hủy</button>
+      <button class="btn btn-gold" onclick="submitReward()">Save Reward</button>
+    </div>
+  </div>
+</div>
+
+<!-- Onboarding modal -->
+<div class="modal-overlay" id="onboarding-modal">
+  <div class="modal">
+    <h3>🎮 Chào mừng đến với Life RPG!</h3>
+    <p class="small-note" style="margin-bottom:14px;">Hãy cho chúng tôi biết một chút về bạn để cá nhân hóa hành trình.</p>
+    <div class="field"><label>Tên nhân vật của bạn</label><input type="text" id="ob-name" placeholder="VD: Nhý"></div>
+    <div class="field">
+      <label>Bạn muốn phát triển những mặt nào? (chọn tối đa 4)</label>
+      <div class="checklist" id="ob-goals"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="skipOnboarding()">Bỏ qua</button>
+      <button class="btn btn-gold" onclick="submitOnboarding()">Bắt đầu hành trình</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm reset modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <h3 id="confirm-title">Bạn chắc chắn?</h3>
+    <p class="small-note" id="confirm-body">Hành động này không thể hoàn tác.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('confirm-modal')">Hủy</button>
+      <button class="btn btn-danger" id="confirm-btn">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- Celebration overlay -->
+<div class="celebrate-overlay" id="celebrate-overlay">
+  <div class="celebrate-card" id="celebrate-card">
+    <div class="celebrate-emoji" id="celebrate-emoji">🎉</div>
+    <div class="celebrate-title" id="celebrate-title">LEVEL UP!</div>
+    <div class="celebrate-sub" id="celebrate-sub"></div>
+    <button class="btn btn-gold" onclick="closeCelebrate()">Tuyệt vời!</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   LIFE RPG — data model, engine, rendering
+   ========================================================= */
+
+const STORAGE_KEY = 'liferpg_v2';
+const LEGACY_STORAGE_KEY = 'liferpg_v1';
+let storageOK = true;
+try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); }catch(e){ storageOK = false; }
+
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+const todayStr = (d) => { const x = d || new Date(); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); };
+const clamp = (v,min,max) => Math.max(min, Math.min(max, v));
+const fmt = (n) => Math.round(n).toLocaleString('en-US');
+
+const STAT_DEFS = [
+  {key:'knowledge', name:'Knowledge', icon:'🧠', color:'var(--sky)'},
+  {key:'health', name:'Health', icon:'💪', color:'var(--rose)'},
+  {key:'focus', name:'Focus', icon:'🎯', color:'var(--plum)'},
+  {key:'discipline', name:'Discipline', icon:'🔥', color:'var(--gold)'},
+  {key:'creativity', name:'Creativity', icon:'🎨', color:'var(--rose)'},
+  {key:'social', name:'Social', icon:'🤝', color:'var(--sage)'},
+  {key:'finance', name:'Finance', icon:'💰', color:'var(--gold)'},
+  {key:'language', name:'Language', icon:'🌎', color:'var(--sky)'},
+  {key:'wellbeing', name:'Well-being', icon:'❤️', color:'var(--rose)'},
+  {key:'career', name:'Career', icon:'💼', color:'var(--plum)'},
+];
+const STAT_CAP = 999;
+const MOTIVATIONAL_QUOTES = [
+  'Không cần hoàn hảo, chỉ cần tiến bộ mỗi ngày.',
+  'Nhân vật của bạn mạnh lên từ những việc nhỏ hôm nay.',
+  'Một ngày chậm vẫn tốt hơn một ngày không bước tiếp.',
+  'Bạn không thua cuộc — bạn chỉ đang ở giữa hành trình.',
+  'Mỗi Quest hoàn thành là một bước gần hơn tới phiên bản tốt hơn của chính mình.',
+  'Nghỉ ngơi cũng là một phần của hành trình, không phải thất bại.',
+  'Hãy chơi trò chơi cuộc đời của bạn như một nhà thám hiểm, không phải một tù nhân.',
+  'XP hôm nay, phiên bản tốt hơn của bạn ngày mai.',
+  'Streak có thể đứt, nhưng hành trình của bạn thì không.',
+  'Người chiến thắng thật sự là người quay lại sau một ngày tệ.',
+];
+
+const DIFF_DEFS = {1:{label:'Easy', stars:'⭐', xp:10, color:'var(--sage)'},2:{label:'Normal', stars:'⭐⭐', xp:20, color:'var(--sky)'},3:{label:'Hard', stars:'⭐⭐⭐', xp:35, color:'var(--gold)'},4:{label:'Epic', stars:'⭐⭐⭐⭐', xp:60, color:'var(--rose)'},5:{label:'Legendary', stars:'⭐⭐⭐⭐⭐', xp:100, color:'var(--plum)'}};
+
+const DEFAULT_ACTIONS = [
+  {key:'study', name:'Học tập / Learning', icon:'📚', xp:20, limit:2, stats:{knowledge:2, discipline:1}, enabled:true},
+  {key:'reading', name:'Đọc sách', icon:'📖', xp:10, limit:3, stats:{knowledge:1, focus:1}, enabled:true},
+  {key:'exercise', name:'Tập thể dục', icon:'💪', xp:20, limit:1, stats:{health:2, discipline:1}, enabled:true},
+  {key:'language', name:'Học ngoại ngữ', icon:'🌎', xp:15, limit:2, stats:{language:2, knowledge:1}, enabled:true},
+  {key:'deepwork', name:'Deep Work', icon:'🎯', xp:20, limit:2, stats:{focus:2, discipline:1}, enabled:true},
+  {key:'assignment', name:'Hoàn thành assignment', icon:'📝', xp:20, limit:3, stats:{knowledge:1, discipline:1}, enabled:true},
+  {key:'water', name:'Uống đủ nước', icon:'💧', xp:5, limit:1, stats:{health:1}, enabled:true},
+  {key:'sleep', name:'Ngủ đủ / chăm sóc giấc ngủ', icon:'😴', xp:15, limit:1, stats:{wellbeing:1, health:1}, enabled:true},
+  {key:'help', name:'Giúp đỡ người khác', icon:'🤝', xp:15, limit:2, stats:{social:2, wellbeing:1}, enabled:true},
+  {key:'newthing', name:'Thử một điều mới', icon:'✨', xp:30, limit:1, stats:{creativity:2, social:1}, enabled:true},
+  {key:'selfcare', name:'Self-care', icon:'🧘', xp:15, limit:1, stats:{wellbeing:2, health:1}, enabled:true},
+];
+
+const ACHIEVEMENT_DEFS = [
+  {key:'first_step', name:'First Step', icon:'🏆', desc:'Hoàn thành Quest đầu tiên.', check: s => s.stats_meta.questsCompletedTotal >= 1},
+  {key:'bookworm', name:'Bookworm', icon:'📖', desc:'Đọc sách 5 lần.', check: s => (s.actionCounts.reading||0) >= 5},
+  {key:'scholar', name:'Scholar', icon:'🧠', desc:'Tích lũy 100 lần học tập / deep work.', check: s => ((s.actionCounts.study||0)+(s.actionCounts.deepwork||0)) >= 100},
+  {key:'streak7', name:'7 Day Streak', icon:'🔥', desc:'Duy trì streak 7 ngày.', check: s => s.player.streak.best >= 7},
+  {key:'streak30', name:'30 Day Streak', icon:'🔥', desc:'Duy trì streak 30 ngày.', check: s => s.player.streak.best >= 30},
+  {key:'ironbody', name:'Iron Body', icon:'💪', desc:'Tập thể dục 30 lần.', check: s => (s.actionCounts.exercise||0) >= 30},
+  {key:'explorer', name:'Explorer', icon:'🌎', desc:'Thử 10 điều mới.', check: s => (s.actionCounts.newthing||0) >= 10},
+  {key:'questmaster', name:'Quest Master', icon:'⚔️', desc:'Hoàn thành 100 Quest.', check: s => s.stats_meta.questsCompletedTotal >= 100},
+  {key:'level10', name:'Level 10', icon:'⭐', desc:'Đạt Level 10.', check: s => calculateLevel(s.player.totalXP).level >= 10},
+  {key:'level25', name:'Level 25', icon:'🏆', desc:'Đạt Level 25.', check: s => calculateLevel(s.player.totalXP).level >= 25},
+  {key:'level50', name:'Level 50', icon:'👑', desc:'Đạt Level 50.', check: s => calculateLevel(s.player.totalXP).level >= 50},
+  {key:'discipline_master', name:'Discipline Master', icon:'🔥', desc:'Discipline đạt 100 điểm.', check: s => s.stats.discipline >= 100},
+  {key:'wellrounded', name:'Well Rounded', icon:'🌟', desc:'Tất cả chỉ số đạt tối thiểu 20 điểm.', check: s => STAT_DEFS.every(d => s.stats[d.key] >= 20)},
+];
+
+const JOURNEY_DEFS = [
+  {key:'start', name:'Starting Point', icon:'🏠', desc:'Điểm khởi đầu hành trình.', check: () => true},
+  {key:'forest', name:'Knowledge Forest', icon:'📚', desc:'Cần 100 điểm Knowledge', check: s => s.stats.knowledge >= 100},
+  {key:'mountain', name:'Health Mountain', icon:'💪', desc:'Cần 100 điểm Health', check: s => s.stats.health >= 100},
+  {key:'village', name:'Language Village', icon:'🌎', desc:'Cần 50 điểm Language', check: s => s.stats.language >= 50},
+  {key:'city', name:'Career City', icon:'💼', desc:'Đạt Level 15', check: s => calculateLevel(s.player.totalXP).level >= 15},
+  {key:'valley', name:'Financial Valley', icon:'💰', desc:'Cần 60 điểm Finance', check: s => s.stats.finance >= 60},
+  {key:'future', name:'Future Self', icon:'🌟', desc:'Cần 30 ngày streak tốt nhất', check: s => s.player.streak.best >= 30},
+];
+
+const REWARD_DEFAULTS = [
+  {name:'Xem một bộ phim', icon:'🎬', cost:100, desc:''},
+  {name:'Chơi game', icon:'🎮', cost:150, desc:''},
+  {name:'Ăn món yêu thích', icon:'🍰', cost:200, desc:''},
+  {name:'Đi uống món mình thích', icon:'☕', cost:300, desc:''},
+  {name:'Mua một món nhỏ', icon:'🛍️', cost:500, desc:''},
+  {name:'Đi chơi', icon:'🌆', cost:800, desc:''},
+  {name:'Phần thưởng lớn', icon:'🎁', cost:1000, desc:''},
+];
+
+const MOODS = ['😫','😕','😐','🙂','😄','🤩'];
+
+const NAV_ITEMS = [
+  {key:'dashboard', icon:'🏠', label:'Dashboard'},
+  {key:'quests', icon:'⚔️', label:'Quests'},
+  {key:'journey', icon:'🗺️', label:'Journey'},
+  {key:'character', icon:'🧙', label:'Character'},
+  {key:'collection', icon:'🎒', label:'Collection'},
+  {key:'dailylog', icon:'📅', label:'Daily Log'},
+  {key:'rewards', icon:'🎁', label:'Rewards'},
+  {key:'progress', icon:'📈', label:'Progress'},
+  {key:'settings', icon:'⚙️', label:'Settings'},
+];
+
+/* ---------------- Collection (cosmetics) ---------------- */
+const COLLECTION_DEFS = [
+  {id:'hair_default', type:'hair', name:'Tóc Ánh Vàng', icon:'👱', defaultUnlocked:true, source:'Mặc định'},
+  {id:'hair_fire', type:'hair', name:'Bờm Lửa', icon:'🔥', defaultUnlocked:false, source:'Board Adventure'},
+  {id:'hair_cloud', type:'hair', name:'Tóc Mây', icon:'☁️', defaultUnlocked:false, source:'Board Adventure'},
+  {id:'outfit_default', type:'outfit', name:'Áo Vải Du Hành', icon:'🥋', defaultUnlocked:true, source:'Mặc định'},
+  {id:'outfit_forest', type:'outfit', name:'Giáp Rừng', icon:'🥼', defaultUnlocked:false, source:'Knowledge Forest'},
+  {id:'outfit_royal', type:'outfit', name:'Bào Hoàng Gia', icon:'👘', defaultUnlocked:false, source:'Level 20'},
+  {id:'acc_none', type:'accessory', name:'Không đeo', icon:'➖', defaultUnlocked:true, source:'Mặc định'},
+  {id:'acc_laurel', type:'accessory', name:'Vòng Nguyệt Quế', icon:'🌿', defaultUnlocked:false, source:'Achievement'},
+  {id:'acc_glasses', type:'accessory', name:'Kính Học Giả', icon:'👓', defaultUnlocked:false, source:'Scholar Achievement'},
+  {id:'pet_none', type:'pet', name:'Không có', icon:'➖', defaultUnlocked:true, source:'Mặc định'},
+  {id:'pet_owl', type:'pet', name:'Cú Tri Thức', icon:'🦉', defaultUnlocked:false, source:'Board Adventure'},
+  {id:'pet_cat', type:'pet', name:'Mèo May Mắn', icon:'🐱', defaultUnlocked:false, source:'Board Adventure'},
+  {id:'pet_dragon', type:'pet', name:'Rồng Nhỏ', icon:'🐉', defaultUnlocked:false, source:'Level 30'},
+  {id:'aura_none', type:'aura', name:'Không có', icon:'➖', defaultUnlocked:true, source:'Mặc định'},
+  {id:'aura_gold', type:'aura', name:'Hào Quang Vàng', icon:'✨', defaultUnlocked:false, source:'Streak 30'},
+  {id:'aura_mist', type:'aura', name:'Sương Mù Bí Ẩn', icon:'🌫️', defaultUnlocked:false, source:'Board Adventure'},
+  {id:'title_beginner', type:'title', name:'Người Mới Bắt Đầu', icon:'🔰', defaultUnlocked:true, source:'Mặc định'},
+  {id:'title_scholar', type:'title', name:'Học Giả Trẻ', icon:'🎓', defaultUnlocked:false, source:'Scholar Achievement'},
+  {id:'title_disciplined', type:'title', name:'Chiến Binh Kỷ Luật', icon:'🛡️', defaultUnlocked:false, source:'Discipline 100'},
+  {id:'title_explorer', type:'title', name:'Nhà Thám Hiểm', icon:'🧭', defaultUnlocked:false, source:'Explorer Achievement'},
+];
+const COLLECTION_TYPES = [{key:'hair',label:'Hair',icon:'💇'},{key:'outfit',label:'Outfit',icon:'👕'},{key:'accessory',label:'Accessory',icon:'💍'},{key:'pet',label:'Pet',icon:'🐾'},{key:'aura',label:'Aura',icon:'✨'},{key:'title',label:'Title',icon:'🏷️'}];
+
+/* ---------------- Adventure board ---------------- */
+const BOARD_THEME = {key:'forest', name:'Knowledge Forest Trail', icon:'🌲'};
+const BOARD_TILES = [
+  {type:'rest', icon:'🏕️', label:'Nghỉ chân', value:10},
+  {type:'reward', icon:'🪙', label:'Kho báu nhỏ', value:20},
+  {type:'lucky', icon:'🍀', label:'May mắn +2 ô', value:2},
+  {type:'trap', icon:'🕳️', label:'Bẫy -2 ô', value:-2},
+  {type:'boost', icon:'⚡', label:'Tăng lực', value:25},
+  {type:'reward', icon:'🪙', label:'Rương vàng', value:20},
+  {type:'event', icon:'🌟', label:'Sự kiện bất ngờ', value:15},
+  {type:'teleport', icon:'🌀', label:'Dịch chuyển', value:0},
+  {type:'roll_again', icon:'🎲', label:'Tung xúc xắc lần nữa', value:0},
+  {type:'reward', icon:'🪙', label:'Kho báu', value:20},
+  {type:'cosmetic', icon:'🎁', label:'Vật phẩm bí ẩn', value:0},
+  {type:'trap', icon:'🕳️', label:'Bẫy -2 ô', value:-2},
+  {type:'lucky', icon:'🍀', label:'May mắn +2 ô', value:2},
+  {type:'challenge', icon:'⚔️', label:'Thử thách chớp nhoáng', value:18},
+  {type:'reward', icon:'🪙', label:'Rương bạc', value:15},
+  {type:'cosmetic', icon:'🎁', label:'Rương huyền thoại', value:0},
+];
+const EVENT_FLAVORS = [
+  'Bạn tìm thấy một con đường tắt xuyên rừng!','Một người bạn đồng hành để lại cho bạn vài đồng xu.','Bạn nghỉ ngơi bên suối và cảm thấy tràn đầy năng lượng.','Một cơn gió may mắn thổi qua!','Bạn phát hiện dấu vết của một kho báu cổ.'
+];
+
+/* ---------------- Sample data ---------------- */
+function sampleQuests(){
+  return [
+    {id:uid(), name:'Học 1 tiếng', description:'', category:'knowledge', difficulty:2, xp:20, statRewards:{knowledge:2,discipline:1}, type:'daily', recurring:true, deadline:null, status:'active', completedDates:[], createdAt: todayStr()},
+    {id:uid(), name:'Tập thể dục', description:'', category:'health', difficulty:2, xp:20, statRewards:{health:2,discipline:1}, type:'daily', recurring:true, deadline:null, status:'active', completedDates:[], createdAt: todayStr()},
+    {id:uid(), name:'Học tiếng Trung', description:'', category:'language', difficulty:1, xp:15, statRewards:{language:2,knowledge:1}, type:'daily', recurring:true, deadline:null, status:'active', completedDates:[], createdAt: todayStr()},
+    {id:uid(), name:'Đọc 20 trang', description:'', category:'knowledge', difficulty:1, xp:10, statRewards:{knowledge:1,focus:1}, type:'daily', recurring:true, deadline:null, status:'active', completedDates:[], createdAt: todayStr()},
+    {id:uid(), name:'Hoàn thành assignment môn Luật', description:'', category:'knowledge', difficulty:3, xp:35, statRewards:{knowledge:2,discipline:1}, type:'longterm', recurring:false, deadline:null, status:'active', completedDates:[], createdAt: todayStr()},
+  ];
+}
+function freshCollection(){
+  return COLLECTION_DEFS.map(c => ({id:c.id, unlocked: !!c.defaultUnlocked, unlockedAt: c.defaultUnlocked? todayStr() : null}));
+}
+function freshEquipped(){
+  return {hair:'hair_default', outfit:'outfit_default', accessory:'acc_none', pet:'pet_none', aura:'aura_none', title:'title_beginner'};
+}
+function freshState(withSample){
+  const stats = {}; STAT_DEFS.forEach(d => stats[d.key] = withSample ? ({knowledge:42,health:35,focus:31,discipline:48,creativity:25,social:30,finance:20,language:27,wellbeing:38,career:16}[d.key]||0) : 0);
+  return {
+    version:2,
+    player:{ name:'MY CHARACTER', totalXP: withSample ? 6200 : 0, spendableXP: withSample ? 340 : 0, coins: withSample ? 120 : 0,
+      streak:{current: withSample?4:0, best: withSample?9:0},
+      subStreaks:{study:{current:0,best:0},exercise:{current:0,best:0},reading:{current:0,best:0},language:{current:0,best:0},deepwork:{current:0,best:0}},
+      daysPlayed: withSample?12:0, lastActiveDate:null, createdAt: todayStr() },
+    stats,
+    quests: withSample ? sampleQuests() : [],
+    achievements: ACHIEVEMENT_DEFS.map(a => ({key:a.key, unlocked:false, unlockedAt:null})),
+    journeyUnlocks: JOURNEY_DEFS.map(j => ({key:j.key, unlocked: j.key==='start', unlockedAt: j.key==='start'?todayStr():null})),
+    rewards: REWARD_DEFAULTS.map(r => ({id:uid(), ...r, purchases:[]})),
+    dailyLogs:{},
+    actionCounts:{},
+    actionDefs: JSON.parse(JSON.stringify(DEFAULT_ACTIONS)),
+    stats_meta:{ questsCompletedTotal:0 },
+    customCategories: [],
+    collection: freshCollection(),
+    equipped: freshEquipped(),
+    adventure:{ theme: BOARD_THEME.key, boardPosition:0, rollsAvailable: withSample?1:0, pityCounter:0, totalRolls:0, lastResult:null, history:[] },
+    onboarding:{ done: !!withSample, name:null, goals:[] },
+    settings:{ theme:'light', sound:true, animation:true, confetti:true, isSample: !!withSample },
+  };
+}
+
+function migrateFromV1(old){
+  const fresh = freshState(false);
+  fresh.player.name = old.player?.name || fresh.player.name;
+  fresh.player.totalXP = old.player?.totalXP || 0;
+  fresh.player.spendableXP = old.player?.spendableXP || 0;
+  fresh.player.streak = old.player?.streak || fresh.player.streak;
+  fresh.player.daysPlayed = old.player?.daysPlayed || 0;
+  fresh.player.lastActiveDate = old.player?.lastActiveDate || null;
+  fresh.player.createdAt = old.player?.createdAt || fresh.player.createdAt;
+  fresh.stats = old.stats || fresh.stats;
+  fresh.quests = old.quests || [];
+  fresh.achievements = old.achievements || fresh.achievements;
+  fresh.journeyUnlocks = old.journeyUnlocks || fresh.journeyUnlocks;
+  fresh.rewards = old.rewards || fresh.rewards;
+  fresh.dailyLogs = old.dailyLogs || {};
+  fresh.actionCounts = old.actionCounts || {};
+  fresh.actionDefs = old.actionDefs || fresh.actionDefs;
+  fresh.stats_meta = old.stats_meta || fresh.stats_meta;
+  fresh.settings = Object.assign({}, fresh.settings, old.settings||{});
+  fresh.onboarding.done = true; // returning user, skip onboarding
+  return fresh;
+}
+
+let state = load();
+function load(){
+  if(!storageOK) return freshState(true);
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.player) return backfillState(parsed);
+    }
+    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if(legacyRaw){
+      const legacy = JSON.parse(legacyRaw);
+      if(legacy && legacy.player) return backfillState(migrateFromV1(legacy));
+    }
+    return freshState(true);
+  }catch(e){ return freshState(true); }
+}
+function backfillState(parsed){
+  parsed.actionCounts = parsed.actionCounts || {};
+  parsed.actionDefs = parsed.actionDefs || JSON.parse(JSON.stringify(DEFAULT_ACTIONS));
+  parsed.stats_meta = parsed.stats_meta || {questsCompletedTotal:0};
+  parsed.journeyUnlocks = parsed.journeyUnlocks || JOURNEY_DEFS.map(j => ({key:j.key, unlocked:j.key==='start', unlockedAt:j.key==='start'?todayStr():null}));
+  parsed.collection = parsed.collection || freshCollection();
+  parsed.equipped = parsed.equipped || freshEquipped();
+  parsed.adventure = parsed.adventure || {theme:BOARD_THEME.key, boardPosition:0, rollsAvailable:0, pityCounter:0, totalRolls:0, lastResult:null, history:[]};
+  parsed.onboarding = parsed.onboarding || {done:true, name:null, goals:[]};
+  if(typeof parsed.player.coins !== 'number') parsed.player.coins = 0;
+  parsed.customCategories = parsed.customCategories || [];
+  STAT_DEFS.forEach(d => { if(typeof parsed.stats[d.key] !== 'number') parsed.stats[d.key] = 0; });
+  parsed.actionDefs.forEach(a => { if(typeof a.enabled !== 'boolean') a.enabled = true; if(!a.icon) a.icon = '⭐'; });
+  return parsed;
+}
+function save(){
+  if(!storageOK) return;
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* ignore quota errors */ }
+}
+
+/* ---------------- Level math ---------------- */
+function xpForLevel(level){ return level*100; } // XP needed to go from `level` to `level+1`
+function calculateLevel(totalXP){
+  let level = 1, remaining = totalXP, needed = xpForLevel(1);
+  while(remaining >= needed){ remaining -= needed; level++; needed = xpForLevel(level); }
+  return {level, into: remaining, needed};
+}
+
+/* ---------------- Core actions ---------------- */
+function addXP(amount, opts){
+  opts = opts || {};
+  const before = calculateLevel(state.player.totalXP).level;
+  state.player.totalXP += amount;
+  if(opts.spendable !== false) state.player.spendableXP += amount;
+  const after = calculateLevel(state.player.totalXP);
+  markToday();
+  if(after.level > before){
+    const coinGain = (after.level-before) * 15;
+    state.player.coins += coinGain;
+    if(after.level >= 20) unlockCollectionItem('outfit_royal');
+    if(after.level >= 30) unlockCollectionItem('pet_dragon');
+    triggerLevelUp(before, after.level, coinGain);
+  }
+  return after;
+}
+function addCoins(amount){ state.player.coins = Math.max(0, state.player.coins + amount); }
+function spendXP(amount){
+  if(state.player.spendableXP < amount) return false;
+  state.player.spendableXP -= amount;
+  return true;
+}
+function updateStat(key, delta){
+  if(!(key in state.stats)) return;
+  state.stats[key] = clamp(state.stats[key] + delta, 0, STAT_CAP);
+}
+function markToday(){
+  const t = todayStr();
+  if(state.player.lastActiveDate !== t){
+    state.player.daysPlayed += 1;
+    state.player.lastActiveDate = t;
+  }
+  if(!state.dailyLogs[t]) state.dailyLogs[t] = {xpEarned:0, questsCompleted:0, mood:null, note:'', actions:{}};
+}
+function logXPToday(amount){
+  markToday();
+  const t = todayStr();
+  state.dailyLogs[t].xpEarned = (state.dailyLogs[t].xpEarned||0) + amount;
+}
+function updateOverallStreak(){
+  const t = new Date(); const y = new Date(); y.setDate(y.getDate()-1);
+  const todayKey = todayStr(t), yKey = todayStr(y);
+  const logToday = state.dailyLogs[todayKey];
+  if(!logToday) return;
+  const hadYesterday = !!state.dailyLogs[yKey];
+  if(state.player.streak.current === 0){ state.player.streak.current = 1; }
+  else if(state.player._lastStreakDay === yKey){ state.player.streak.current += 1; }
+  else if(state.player._lastStreakDay !== todayKey){ state.player.streak.current = 1; }
+  state.player._lastStreakDay = todayKey;
+  state.player.streak.best = Math.max(state.player.streak.best, state.player.streak.current);
+}
+
+function doAction(actionKey){
+  const def = state.actionDefs.find(a => a.key === actionKey);
+  if(!def || def.enabled===false) return;
+  const t = todayStr();
+  markToday();
+  const log = state.dailyLogs[t];
+  log.actions = log.actions || {};
+  const used = log.actions[actionKey] || 0;
+  if(def.limit && used >= def.limit){
+    toast('⏳ Đã đạt giới hạn hôm nay', `${def.icon||''} ${def.name} chỉ có thể +XP ${def.limit} lần/ngày.`, null);
+    return;
+  }
+  log.actions[actionKey] = used + 1;
+  state.actionCounts[actionKey] = (state.actionCounts[actionKey]||0) + 1;
+  const lvl = addXP(def.xp);
+  logXPToday(def.xp);
+  let statLines = [];
+  Object.entries(def.stats||{}).forEach(([k,v]) => { updateStat(k,v); statLines.push(`${capitalize(k)} +${v}`); });
+  updateOverallStreak();
+  checkAchievements();
+  checkJourney();
+  save(); renderAll();
+  toast(`✅ ${def.name}`, `+${def.xp} XP${statLines.length? '\n'+statLines.join(' · '):''}`, 'xp');
+}
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+/* ---------- Quests ---------- */
+function addQuest(data){
+  state.quests.push({
+    id: uid(), name:data.name, description:data.description||'', category:data.category,
+    difficulty:Number(data.difficulty), xp:Number(data.xp), statRewards:{[data.category]: data.difficulty>=4?2:1},
+    type:data.type, recurring: !!data.recurring, deadline: data.deadline||null, resource: data.resource||'', status:'active', completedDates:[], createdAt: todayStr()
+  });
+  save(); renderAll();
+}
+function updateQuest(id, data){
+  const q = state.quests.find(x=>x.id===id); if(!q) return;
+  Object.assign(q, { name:data.name, description:data.description||'', category:data.category, difficulty:Number(data.difficulty), xp:Number(data.xp), type:data.type, recurring: !!data.recurring, deadline:data.deadline||null, resource: data.resource||'', statRewards:{[data.category]: data.difficulty>=4?2:1} });
+  save(); renderAll();
+}
+function deleteQuest(id){
+  state.quests = state.quests.filter(q=>q.id!==id);
+  save(); renderAll();
+}
+function isQuestDoneToday(q){
+  return q.completedDates && q.completedDates.includes(todayStr());
+}
+function toggleQuest(id){
+  const q = state.quests.find(x=>x.id===id); if(!q) return;
+  const t = todayStr();
+  const doneToday = isQuestDoneToday(q);
+  if(doneToday){
+    q.completedDates = q.completedDates.filter(d=>d!==t);
+    if(!q.recurring) q.status = 'active';
+    state.player.totalXP = Math.max(0, state.player.totalXP - q.xp);
+    state.player.spendableXP = Math.max(0, state.player.spendableXP - q.xp);
+    Object.entries(q.statRewards||{}).forEach(([k,v]) => updateStat(k, -v));
+    save(); renderAll();
+    return;
+  }
+  q.completedDates = q.completedDates || [];
+  q.completedDates.push(t);
+  if(!q.recurring) q.status = 'completed';
+  state.stats_meta.questsCompletedTotal += 1;
+  markToday();
+  state.dailyLogs[t].questsCompleted = (state.dailyLogs[t].questsCompleted||0) + 1;
+  const lvl = addXP(q.xp);
+  logXPToday(q.xp);
+  let statLines = [];
+  Object.entries(q.statRewards||{}).forEach(([k,v]) => { updateStat(k,v); statLines.push(`${capitalize(k)} +${v}`); });
+  updateOverallStreak();
+  checkAchievements();
+  checkJourney();
+  grantRollsIfEligible();
+  save(); renderAll();
+  toast('⭐ QUEST COMPLETED!', `+${q.xp} XP${statLines.length? '\n'+statLines.join(' · '):''}`, 'xp');
+}
+function grantRollsIfEligible(){
+  const t = todayStr();
+  const log = state.dailyLogs[t]; if(!log) return;
+  const completedToday = log.questsCompleted || 0;
+  if(completedToday>=3 && !log.roll3Given){ log.roll3Given=true; state.adventure.rollsAvailable+=1; toast('🎲 Dice Unlocked!','Hoàn thành 3 quest hôm nay — bạn nhận 1 lượt tung xúc xắc!',null); }
+  if(completedToday>=5 && !log.roll5Given){ log.roll5Given=true; state.adventure.rollsAvailable+=1; toast('🎲 Bonus Roll!','Hoàn thành 5 quest — thêm 1 lượt tung xúc xắc!',null); }
+  const dailyQuests = state.quests.filter(q=>q.type==='daily');
+  const allDone = dailyQuests.length>0 && dailyQuests.every(q=>isQuestDoneToday(q));
+  if(allDone && !log.rollAllGiven){ log.rollAllGiven = true; state.adventure.rollsAvailable += 1; toast('🌟 All Dailies Done!','Bạn hoàn thành mọi Daily Quest — thêm 1 lượt tung xúc xắc!',null); }
+}
+
+/* ---------- Achievements ---------- */
+const ACHIEVEMENT_COLLECTION_UNLOCKS = { scholar:'title_scholar', wellrounded:'acc_laurel', discipline_master:'title_disciplined', explorer:'title_explorer', streak30:'aura_gold' };
+function checkAchievements(){
+  ACHIEVEMENT_DEFS.forEach(def => {
+    const rec = state.achievements.find(a=>a.key===def.key);
+    if(rec && !rec.unlocked){
+      try{
+        if(def.check(state)){
+          rec.unlocked = true; rec.unlockedAt = todayStr();
+          addCoins(25);
+          const collId = ACHIEVEMENT_COLLECTION_UNLOCKS[def.key];
+          if(collId) unlockCollectionItem(collId);
+          queueAchievementPopup(def);
+        }
+      }catch(e){}
+    }
+  });
+}
+function unlockCollectionItem(id){
+  const rec = state.collection.find(c=>c.id===id);
+  if(rec && !rec.unlocked){ rec.unlocked = true; rec.unlockedAt = todayStr(); return true; }
+  return false;
+}
+let achievementQueue = [];
+function queueAchievementPopup(def){ achievementQueue.push(def); }
+function flushAchievementQueue(){
+  if(achievementQueue.length===0) return;
+  const def = achievementQueue.shift();
+  showCelebrate('🏆', def.name.toUpperCase()+' UNLOCKED!', def.desc, def.icon);
+}
+
+/* ---------- Journey ---------- */
+const JOURNEY_COLLECTION_UNLOCKS = { forest:'outfit_forest' };
+function checkJourney(){
+  JOURNEY_DEFS.forEach(def => {
+    const rec = state.journeyUnlocks.find(j=>j.key===def.key);
+    if(rec && !rec.unlocked){
+      try{
+        if(def.check(state)){
+          rec.unlocked = true; rec.unlockedAt = todayStr();
+          if(def.key !== 'start'){ addCoins(30); const cid = JOURNEY_COLLECTION_UNLOCKS[def.key]; if(cid) unlockCollectionItem(cid); }
+        }
+      }catch(e){}
+    }
+  });
+}
+
+/* ---------- Rewards ---------- */
+function addReward(data){
+  state.rewards.push({id:uid(), name:data.name, desc:data.desc||'', icon:data.icon||'🎁', cost:Number(data.cost), purchases:[]});
+  save(); renderAll();
+}
+function purchaseReward(id){
+  const r = state.rewards.find(x=>x.id===id); if(!r) return;
+  if(!spendXP(r.cost)){ toast('❌ Không đủ XP', `Cần ${r.cost} Spendable XP.`, null); return; }
+  r.purchases.push({date: todayStr()});
+  save(); renderAll();
+  toast('🎁 Reward Purchased!', r.name, null);
+}
+function deleteReward(id){ state.rewards = state.rewards.filter(r=>r.id!==id); save(); renderAll(); }
+
+/* ---------- Adventure: dice + board ---------- */
+const LOW_VALUE_TYPES = ['rest','trap','reward'];
+const PITY_THRESHOLD = 5;
+function rollDice(){
+  if(state.adventure.rollsAvailable <= 0) return;
+  state.adventure.rollsAvailable -= 1;
+  const diceValue = 1 + Math.floor(Math.random()*6);
+  state.adventure.totalRolls += 1;
+  animateDiceRoll(diceValue, () => {
+    let newPos = (state.adventure.boardPosition + diceValue) % BOARD_TILES.length;
+    state.adventure.boardPosition = newPos;
+    const tile = BOARD_TILES[newPos];
+    const result = resolveTile(tile);
+    let pityBonus = null;
+    if(LOW_VALUE_TYPES.includes(tile.type)){
+      state.adventure.pityCounter += 1;
+      if(state.adventure.pityCounter >= PITY_THRESHOLD){
+        state.adventure.pityCounter = 0;
+        pityBonus = grantPityBonus();
+      }
+    } else {
+      state.adventure.pityCounter = 0;
+    }
+    state.adventure.lastResult = {tile, diceValue, result, pityBonus, at: todayStr()};
+    state.adventure.history.unshift(state.adventure.lastResult);
+    state.adventure.history = state.adventure.history.slice(0,20);
+    save(); renderAll();
+    showDiceResult(diceValue, tile, result, pityBonus);
+  });
+}
+function grantPityBonus(){
+  const locked = state.collection.filter(c=>!c.unlocked);
+  if(locked.length>0){
+    const pick = locked[Math.floor(Math.random()*locked.length)];
+    unlockCollectionItem(pick.id);
+    const def = COLLECTION_DEFS.find(d=>d.id===pick.id);
+    return {type:'cosmetic', label: def? def.name : 'Vật phẩm đặc biệt'};
+  }
+  addCoins(50);
+  return {type:'coins', label:'+50 🪙 bảo chứng may mắn'};
+}
+function resolveTile(tile){
+  switch(tile.type){
+    case 'rest': addCoins(tile.value); return {text:`Nghỉ ngơi, +${tile.value} 🪙`};
+    case 'reward': addCoins(tile.value); return {text:`Nhận được +${tile.value} 🪙`};
+    case 'boost': addCoins(tile.value); return {text:`Tăng lực! +${tile.value} 🪙`};
+    case 'lucky': moveBoardBy(tile.value); return {text:`May mắn! Tiến thêm ${tile.value} ô`};
+    case 'trap': moveBoardBy(tile.value); return {text:`Sa bẫy! Lùi ${Math.abs(tile.value)} ô`};
+    case 'teleport': {
+      const np = Math.floor(Math.random()*BOARD_TILES.length);
+      state.adventure.boardPosition = np;
+      return {text:'Dịch chuyển đến một ô ngẫu nhiên!'};
+    }
+    case 'roll_again': state.adventure.rollsAvailable += 1; return {text:'Nhận thêm 1 lượt tung xúc xắc!'};
+    case 'event': { addCoins(tile.value); const f = EVENT_FLAVORS[Math.floor(Math.random()*EVENT_FLAVORS.length)]; return {text:`${f} (+${tile.value} 🪙)`}; }
+    case 'challenge': addCoins(tile.value); return {text:`Hoàn thành thử thách chớp nhoáng! +${tile.value} 🪙`};
+    case 'cosmetic': {
+      const locked = state.collection.filter(c=>!c.unlocked);
+      if(locked.length>0){
+        const pick = locked[Math.floor(Math.random()*locked.length)];
+        unlockCollectionItem(pick.id);
+        const def = COLLECTION_DEFS.find(d=>d.id===pick.id);
+        return {text:`Mở khóa vật phẩm: ${def?def.name:'???'}!`};
+      }
+      addCoins(40); return {text:'Bộ sưu tập đã đầy — nhận +40 🪙 thay thế!'};
+    }
+    default: return {text:''};
+  }
+}
+function moveBoardBy(steps){
+  const len = BOARD_TILES.length;
+  state.adventure.boardPosition = ((state.adventure.boardPosition + steps) % len + len) % len;
+}
+function animateDiceRoll(finalValue, cb){
+  const el = document.getElementById('dice-face');
+  if(!el){ cb(); return; }
+  let ticks = 0; const maxTicks = 10;
+  const timer = setInterval(()=>{
+    el.textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][Math.floor(Math.random()*6)];
+    ticks++;
+    if(ticks>=maxTicks){ clearInterval(timer); el.textContent = ['⚀','⚁','⚂','⚃','⚄','⚅'][finalValue-1]; setTimeout(cb, 250); }
+  }, 70);
+}
+function showDiceResult(diceValue, tile, result, pityBonus){
+  let sub = `Ô ${tile.icon} ${tile.label} — ${result.text}`;
+  if(pityBonus) sub += `\n🎁 Bảo chứng may mắn: ${pityBonus.label}`;
+  showCelebrate(tile.icon, 'ADVENTURE ROLL!', sub, null);
+}
+
+/* ---------- Collection equip ---------- */
+function equipItem(itemId){
+  const def = COLLECTION_DEFS.find(d=>d.id===itemId);
+  const rec = state.collection.find(c=>c.id===itemId);
+  if(!def || !rec || !rec.unlocked) return;
+  state.equipped[def.type] = itemId;
+  save(); renderAll();
+}
+
+/* ---------- Onboarding ---------- */
+function submitOnboarding(){
+  const name = document.getElementById('ob-name').value.trim() || 'MY CHARACTER';
+  const goals = Array.from(document.querySelectorAll('#ob-goals input:checked')).map(cb=>cb.value);
+  state.player.name = name;
+  state.onboarding = {done:true, name, goals};
+  if(goals.length){
+    goals.forEach(g => {
+      const statDef = STAT_DEFS.find(s=>s.key===g);
+      if(statDef){
+        state.quests.push({id:uid(), name:`Dành 20 phút cho ${statDef.name}`, description:'Quest khởi đầu dựa trên mục tiêu của bạn', category:g, difficulty:2, xp:20, statRewards:{[g]:2}, type:'daily', recurring:true, deadline:null, status:'active', completedDates:[], createdAt:todayStr()});
+      }
+    });
+  }
+  closeModal('onboarding-modal');
+  save(); renderAll();
+  toast('🎉 Chào mừng!', `Xin chào ${name}, hành trình của bạn bắt đầu!`, null);
+}
+function skipOnboarding(){
+  state.onboarding.done = true; save(); closeModal('onboarding-modal'); renderAll();
+}
+
+/* =========================================================
+   Rendering
+   ========================================================= */
+let currentPage = 'dashboard';
+let questFilter = 'daily';
+let progressRange = 7;
+let calCursor = new Date();
+
+function renderNav(){
+  const navlist = document.getElementById('navlist');
+  navlist.innerHTML = NAV_ITEMS.map(n => `<button class="navlink ${n.key===currentPage?'active':''}" onclick="navigate('${n.key}')"><span class="ic">${n.icon}</span>${n.label}</button>`).join('');
+  const bn = document.getElementById('bottomnav');
+  bn.innerHTML = NAV_ITEMS.map(n => `<button class="navlink ${n.key===currentPage?'active':''}" onclick="navigate('${n.key}')"><span class="ic">${n.icon}</span>${n.label}</button>`).join('');
+}
+function navigate(page){
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  renderNav();
+  renderPage(page);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function renderHUD(){
+  const lvl = calculateLevel(state.player.totalXP);
+  document.getElementById('hud-name').textContent = state.player.name;
+  document.getElementById('hud-level').textContent = 'LEVEL '+String(lvl.level).padStart(2,'0');
+  document.getElementById('hud-streak').textContent = '🔥 '+state.player.streak.current+' ngày';
+  const pct = clamp((lvl.into/lvl.needed)*100,0,100);
+  document.getElementById('hud-xpfill').style.width = pct+'%';
+  document.getElementById('hud-xpnow').textContent = `${fmt(lvl.into)} / ${fmt(lvl.needed)} XP`;
+  document.getElementById('hud-xpleft').textContent = `${fmt(lvl.needed-lvl.into)} XP TO NEXT LEVEL`;
+  document.getElementById('hud-totalxp').textContent = fmt(state.player.totalXP);
+  document.getElementById('hud-spendxp').textContent = fmt(state.player.spendableXP);
+  document.getElementById('hud-coins').textContent = fmt(state.player.coins||0);
+  document.getElementById('hud-days').textContent = state.player.daysPlayed;
+}
+
+function categoryLabel(key){
+  const stat = STAT_DEFS.find(d=>d.key===key);
+  if(stat) return stat.icon+' '+stat.name;
+  const custom = state.customCategories.find(c=>c.key===key);
+  if(custom) return custom.icon+' '+custom.name;
+  return capitalize(key||'');
+}
+function questCard(q, opts){
+  opts = opts || {};
+  const diff = DIFF_DEFS[q.difficulty] || DIFF_DEFS[2];
+  const done = isQuestDoneToday(q) || (!q.recurring && q.status==='completed');
+  return `<div class="quest-row" style="--diff-color:${diff.color}">
+    <button class="quest-check ${done?'done':''}" onclick="toggleQuest('${q.id}')">${done?'✓':''}</button>
+    <div class="quest-body">
+      <div class="quest-title ${done?'done':''}">${escapeHtml(q.name)}</div>
+      <div class="quest-meta">
+        <span class="stars">${diff.stars}</span>
+        <span class="tag">${categoryLabel(q.category)}</span>
+        <span class="tag">${q.type}</span>
+        <span class="tag">+${q.xp} XP</span>
+        ${q.deadline? `<span class="tag">⏰ ${q.deadline}</span>` : ''}
+        ${q.resource? `<span class="tag">🔗 tài liệu</span>` : ''}
+      </div>
+    </div>
+    <div class="quest-actions">
+      <button class="iconbtn" title="Duplicate" onclick="duplicateQuest('${q.id}')">📋</button>
+      <button class="iconbtn" title="Edit" onclick="editQuestPrompt('${q.id}')">✏️</button>
+      <button class="iconbtn" title="Delete" onclick="confirmDeleteQuest('${q.id}')">🗑️</button>
+    </div>
+  </div>`;
+}
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
+function renderQuickActions(){
+  const t = todayStr();
+  const log = state.dailyLogs[t] || {actions:{}};
+  const used = log.actions || {};
+  const visible = state.actionDefs.filter(a => a.enabled !== false);
+  document.getElementById('dash-quick-actions').innerHTML = visible.length ? visible.map(a => {
+    const u = used[a.key] || 0;
+    const maxed = a.limit && u >= a.limit;
+    return `<div class="stat-card">
+      <div class="stat-top"><span class="stat-ic">${a.icon||'⭐'}</span><span class="stat-name">${a.name}</span></div>
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span class="tag">+${a.xp} XP</span>
+        <span class="small-note">${a.limit? u+'/'+a.limit+' hôm nay' : 'không giới hạn'}</span>
+      </div>
+      <button class="btn ${maxed?'btn-ghost':'btn-sage'} btn-sm" style="width:100%; justify-content:center; margin-top:9px;" ${maxed?'disabled':''} onclick="doAction('${a.key}')">${maxed?'Đã đạt giới hạn':'+ Nhận XP'}</button>
+    </div>`;
+  }).join('') : emptyState('✨','Chưa có Quick Action nào được bật. Vào Settings để bật hoặc thêm mới.');
+}
+function dayOfYear(){ const now=new Date(); const start=new Date(now.getFullYear(),0,0); return Math.floor((now-start)/86400000); }
+function renderQuoteAndNotifications(){
+  document.getElementById('dash-quote').textContent = MOTIVATIONAL_QUOTES[dayOfYear() % MOTIVATIONAL_QUOTES.length];
+  const notes = [];
+  const t = todayStr();
+  const log = state.dailyLogs[t] || {questsCompleted:0};
+  const todaysDaily = state.quests.filter(q=>q.type==='daily');
+  const remaining = todaysDaily.filter(q=>!isQuestDoneToday(q)).length;
+  if(remaining>0) notes.push(`📌 Bạn còn ${remaining} Daily Quest chưa hoàn thành hôm nay.`);
+  const lvl = calculateLevel(state.player.totalXP);
+  const xpLeft = lvl.needed - lvl.into;
+  if(xpLeft <= 30) notes.push(`⭐ Bạn chỉ còn ${xpLeft} XP nữa là Level Up!`);
+  if(state.adventure.rollsAvailable>0) notes.push(`🎲 Bạn có ${state.adventure.rollsAvailable} lượt tung xúc xắc Adventure đang chờ.`);
+  const nextJourney = JOURNEY_DEFS.find(j => { const rec = state.journeyUnlocks.find(r=>r.key===j.key); return rec && !rec.unlocked; });
+  if(nextJourney) notes.push(`🗺️ Vùng đất tiếp theo: ${nextJourney.name} — ${nextJourney.desc}.`);
+  const weakest = STAT_DEFS.reduce((a,b)=> state.stats[a.key] <= state.stats[b.key] ? a : b);
+  if(weakest) notes.push(`🌱 ${weakest.name} đang là chỉ số bạn ít phát triển nhất — thử một Quest liên quan?`);
+  document.getElementById('dash-notifications').innerHTML = notes.length ? notes.map(n=>`<div>${n}</div>`).join('') : '<div>✅ Mọi thứ đều ổn — chúc bạn một ngày tuyệt vời!</div>';
+}
+function renderDashboard(){
+  renderHUD();
+  renderQuoteAndNotifications();
+  renderAdventureWidget();
+  renderQuickActions();
+  const todays = state.quests.filter(q => q.type==='daily' || (q.deadline===todayStr()));
+  document.getElementById('dash-quest-cnt').textContent = todays.length;
+  document.getElementById('dash-quests').innerHTML = todays.length? todays.map(q=>questCard(q)).join('') : emptyState('⚔️','Chưa có nhiệm vụ nào hôm nay. Nhấn "+ Add Quest" để bắt đầu!');
+
+  document.getElementById('dash-stats').innerHTML = STAT_DEFS.map(statCardHtml).join('');
+
+  const unlocked = state.achievements.filter(a=>a.unlocked).sort((a,b)=> (b.unlockedAt||'').localeCompare(a.unlockedAt||'')).slice(0,3);
+  document.getElementById('dash-achievements').innerHTML = unlocked.length ? unlocked.map(a => achievementCardHtml(a)).join('') : emptyState('🏆','Chưa có thành tựu nào — hãy hoàn thành quest đầu tiên!');
+
+  const t = todayStr();
+  const log = state.dailyLogs[t] || {xpEarned:0, questsCompleted:0};
+  document.getElementById('dash-today-summary').innerHTML = `
+    <div style="display:flex; gap:22px; flex-wrap:wrap;">
+      <div class="mini-stat"><b>${fmt(log.xpEarned||0)}</b><span>XP hôm nay</span></div>
+      <div class="mini-stat"><b>${log.questsCompleted||0}</b><span>Quest xong</span></div>
+      <div class="mini-stat"><b>${log.mood||'—'}</b><span>Mood</span></div>
+      <div class="mini-stat"><b>${state.player.streak.current}</b><span>Streak</span></div>
+    </div>`;
+}
+
+function statCardHtml(d){
+  const val = state.stats[d.key];
+  const pct = clamp((val % 100)/100*100, val>=STAT_CAP?100:0, 100);
+  const rank = Math.floor(val/100);
+  const rankNames = ['Novice','Apprentice','Adept','Skilled','Expert','Veteran','Master','Elite','Legend','Mythic'];
+  return `<div class="stat-card">
+    <div class="stat-top"><span class="stat-ic">${d.icon}</span><span class="stat-name">${d.name}</span><span class="stat-val">${val}</span></div>
+    <div class="stat-track"><div class="stat-fill" style="width:${val>=STAT_CAP?100:pct}%; background:${d.color}"></div></div>
+    <div class="stat-foot"><span>${rankNames[Math.min(rank,9)]}</span><span>${val>=STAT_CAP?'MAX':(100-(val%100))+' to next rank'}</span></div>
+  </div>`;
+}
+function achievementCardHtml(rec){
+  const def = ACHIEVEMENT_DEFS.find(d=>d.key===rec.key);
+  if(!def) return '';
+  if(!rec.unlocked) return `<div class="ach-card locked"><div class="ach-badge">🔒</div><div class="ach-name">???</div><div class="ach-desc">Chưa mở khóa</div></div>`;
+  return `<div class="ach-card"><div class="ach-badge">${def.icon}</div><div class="ach-name">${def.name}</div><div class="ach-desc">${def.desc}</div><div class="ach-date">Mở khóa ${rec.unlockedAt}</div></div>`;
+}
+function emptyState(emoji, text){ return `<div class="empty-state"><div class="em">${emoji}</div>${text}</div>`; }
+
+function renderQuests(){
+  const tabs = [{key:'daily',label:'Daily'},{key:'weekly',label:'Weekly'},{key:'monthly',label:'Monthly'},{key:'longterm',label:'Long-term'},{key:'all',label:'All'}];
+  document.getElementById('quest-filter-tabs').innerHTML = tabs.map(t=>`<button class="range-tab ${questFilter===t.key?'active':''}" onclick="setQuestFilter('${t.key}')">${t.label}</button>`).join('');
+  let list = questFilter==='all' ? state.quests : state.quests.filter(q=>q.type===questFilter);
+  document.getElementById('quest-list').innerHTML = list.length ? list.map(q=>questCard(q)).join('') : emptyState('⚔️','Không có quest nào trong mục này.');
+}
+function setQuestFilter(f){ questFilter=f; renderQuests(); }
+
+function renderStatsPage(){
+  document.getElementById('stats-full').innerHTML = STAT_DEFS.map(statCardHtml).join('');
+}
+function renderAchievementsPage(){
+  document.getElementById('ach-full').innerHTML = state.achievements.map(a=>achievementCardHtml(a)).join('');
+}
+function renderJourney(){
+  let html = '';
+  JOURNEY_DEFS.forEach((def,i) => {
+    const rec = state.journeyUnlocks.find(j=>j.key===def.key);
+    const unlocked = rec && rec.unlocked;
+    html += `<div class="journey-node ${unlocked?'done':'locked'}">
+      <div class="journey-ic">${unlocked? def.icon : '🔒'}</div>
+      <div><div class="journey-title">${def.name}</div><div class="journey-req">${unlocked? (rec.unlockedAt? 'Mở khóa '+rec.unlockedAt : 'Đã mở khóa') : def.desc}</div></div>
+    </div>`;
+    if(i < JOURNEY_DEFS.length-1) html += `<div class="journey-connector"></div>`;
+  });
+  document.getElementById('journey-path').innerHTML = html;
+}
+
+const ENERGY_LEVELS = ['🪫','🔋','🔋','⚡','⚡⚡'];
+function renderDailyLog(){
+  const t = todayStr();
+  const log = state.dailyLogs[t] || {};
+  document.getElementById('mood-row').innerHTML = MOODS.map(m => `<button class="mood-btn ${log.mood===m?'sel':''}" onclick="selectMood('${m}')">${m}</button>`).join('');
+  document.getElementById('energy-row').innerHTML = ENERGY_LEVELS.map((e,i) => `<button class="mood-btn ${log.energy===(i+1)?'sel':''}" onclick="selectEnergy(${i+1})">${e}</button>`).join('');
+  document.getElementById('daily-note').value = log.note || '';
+  document.getElementById('daily-accomplishment').value = log.accomplishment || '';
+  document.getElementById('daily-gratitude').value = log.gratitude || '';
+  document.getElementById('daily-tomorrow').value = log.tomorrow || '';
+  document.getElementById('daily-difficulty').value = log.difficulty || 'normal';
+  const items = [
+    {key:'sleep', label:'😴 Sleep'}, {key:'exercise', label:'💪 Exercise'}, {key:'study', label:'📚 Study'},
+    {key:'reading', label:'📖 Reading'}, {key:'language', label:'🌎 Language'}, {key:'deepwork', label:'🎯 Deep Work'},
+    {key:'water', label:'💧 Water'}, {key:'selfcare', label:'🧘 Self-care'},
+  ];
+  const checked = log.checkin || {};
+  document.getElementById('daily-checklist').innerHTML = items.map(it => `
+    <label class="chk-item"><input type="checkbox" data-k="${it.key}" ${checked[it.key]?'checked':''}> ${it.label}</label>
+  `).join('');
+  renderCalendar();
+}
+function selectMood(m){
+  markToday(); const t = todayStr();
+  state.dailyLogs[t].mood = m; save(); renderDailyLog();
+}
+function selectEnergy(n){
+  markToday(); const t = todayStr();
+  state.dailyLogs[t].energy = n; save(); renderDailyLog();
+}
+function saveCheckIn(){
+  markToday(); const t = todayStr();
+  const log = state.dailyLogs[t];
+  log.note = document.getElementById('daily-note').value;
+  log.accomplishment = document.getElementById('daily-accomplishment').value.trim();
+  log.gratitude = document.getElementById('daily-gratitude').value.trim();
+  log.tomorrow = document.getElementById('daily-tomorrow').value.trim();
+  log.difficulty = document.getElementById('daily-difficulty').value;
+  const checked = {};
+  let xpGain = 0; let statLines=[];
+  document.querySelectorAll('#daily-checklist input[type=checkbox]').forEach(cb => {
+    checked[cb.dataset.k] = cb.checked;
+    if(cb.checked){
+      const def = state.actionDefs.find(a=>a.key===cb.dataset.k);
+      const already = (log.checkin && log.checkin[cb.dataset.k]);
+      if(def && !already){
+        const used = (log.actions && log.actions[def.key]) || 0;
+        if(!def.limit || used < def.limit){
+          log.actions = log.actions || {};
+          log.actions[def.key] = used+1;
+          state.actionCounts[def.key] = (state.actionCounts[def.key]||0)+1;
+          xpGain += def.xp;
+          Object.entries(def.stats||{}).forEach(([k,v])=>{ updateStat(k,v); statLines.push(`${capitalize(k)} +${v}`);});
+        }
+      }
+    }
+  });
+  log.checkin = checked;
+  if(xpGain>0){ addXP(xpGain); logXPToday(xpGain); }
+  updateOverallStreak();
+  checkAchievements(); checkJourney();
+  save(); renderAll();
+  toast('💾 Check-in Saved', xpGain>0? `+${xpGain} XP${statLines.length?'\n'+statLines.join(' · '):''}` : 'Đã lưu ngày hôm nay', xpGain>0?'xp':null);
+}
+
+function renderCalendar(){
+  const y = calCursor.getFullYear(), m = calCursor.getMonth();
+  document.getElementById('cal-month-label').textContent = calCursor.toLocaleDateString('vi-VN', {month:'long', year:'numeric'});
+  const first = new Date(y,m,1); const startDow = first.getDay();
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const dows = ['CN','T2','T3','T4','T5','T6','T7'];
+  let html = dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<startDow;i++) html += `<div class="cal-cell empty"></div>`;
+  const todayKey = todayStr();
+  for(let d=1; d<=daysInMonth; d++){
+    const key = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const log = state.dailyLogs[key];
+    const has = log && ((log.xpEarned||0)>0 || log.mood || (log.questsCompleted||0)>0);
+    html += `<div class="cal-cell ${has?'has':''} ${key===todayKey?'today':''}" onclick="showDayDetail('${key}')">${d}${has?`<span class="cal-dot">${log.mood||'✦'}</span>`:''}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  document.getElementById('cal-day-detail').textContent = '';
+}
+function calShift(dir){ calCursor.setMonth(calCursor.getMonth()+dir); renderCalendar(); }
+function showDayDetail(key){
+  const log = state.dailyLogs[key];
+  const el = document.getElementById('cal-day-detail');
+  if(!log){ el.textContent = key+': Không có dữ liệu.'; return; }
+  el.innerHTML = `<b>${key}</b> — XP: ${fmt(log.xpEarned||0)} · Quests: ${log.questsCompleted||0} · Mood: ${log.mood||'—'}${log.accomplishment? ' · 🏅 '+escapeHtml(log.accomplishment):''}${log.note? ' · "'+escapeHtml(log.note)+'"':''}`;
+}
+
+function renderRewards(){
+  document.getElementById('reward-balance').textContent = fmt(state.player.spendableXP);
+  document.getElementById('reward-list').innerHTML = state.rewards.map(r => `
+    <div class="reward-card">
+      <div class="reward-top"><span class="reward-ic">${r.icon}</span><span class="reward-name">${escapeHtml(r.name)}</span></div>
+      ${r.desc? `<div class="reward-desc">${escapeHtml(r.desc)}</div>` : ''}
+      <div class="reward-foot">
+        <span class="reward-cost">✨ ${fmt(r.cost)} XP</span>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-gold btn-sm" ${state.player.spendableXP < r.cost?'disabled':''} onclick="purchaseReward('${r.id}')">Đổi</button>
+          <button class="iconbtn" onclick="deleteReward('${r.id}')">🗑️</button>
+        </div>
+      </div>
+      ${r.purchases.length? `<div class="small-note">Đã đổi ${r.purchases.length} lần · gần nhất ${r.purchases[r.purchases.length-1].date}</div>`:''}
+    </div>`).join('');
+}
+
+function lastNDays(n){
+  const arr = [];
+  for(let i=n-1;i>=0;i--){ const d = new Date(); d.setDate(d.getDate()-i); arr.push(todayStr(d)); }
+  return arr;
+}
+function renderProgress(){
+  const ranges = [{v:7,l:'7 days'},{v:30,l:'30 days'},{v:90,l:'90 days'},{v:365,l:'1 year'},{v:9999,l:'All time'}];
+  document.getElementById('progress-range-tabs').innerHTML = ranges.map(r=>`<button class="range-tab ${progressRange===r.v?'active':''}" onclick="setProgressRange(${r.v})">${r.l}</button>`).join('');
+  const days = lastNDays(Math.min(progressRange, 365));
+  const xpVals = days.map(d => (state.dailyLogs[d]?.xpEarned)||0);
+  const qVals = days.map(d => (state.dailyLogs[d]?.questsCompleted)||0);
+  document.getElementById('chart-xp').innerHTML = svgLineChart(xpVals, days, 'var(--gold)');
+  document.getElementById('chart-quests').innerHTML = svgBarChart(qVals, days, 'var(--sage)');
+
+  const s = state.player.streak;
+  document.getElementById('progress-streaks').innerHTML = `
+    <div class="grid grid-3">
+      <div class="mini-stat"><b>${s.current}</b><span>Current 🔥</span></div>
+      <div class="mini-stat"><b>${s.best}</b><span>Best 🔥</span></div>
+      <div class="mini-stat"><b>${state.player.daysPlayed}</b><span>Days Played</span></div>
+    </div>`;
+  const totalXPPeriod = xpVals.reduce((a,b)=>a+b,0);
+  const totalQPeriod = qVals.reduce((a,b)=>a+b,0);
+  document.getElementById('progress-activity').innerHTML = `
+    <div class="grid grid-3">
+      <div class="mini-stat"><b>${fmt(totalXPPeriod)}</b><span>XP kỳ này</span></div>
+      <div class="mini-stat"><b>${totalQPeriod}</b><span>Quest xong</span></div>
+      <div class="mini-stat"><b>${state.stats_meta.questsCompletedTotal}</b><span>Tổng Quest</span></div>
+    </div>`;
+}
+function setProgressRange(v){ progressRange=v; renderProgress(); }
+
+function svgLineChart(values, labels, color){
+  const w=560,h=170,pad=26;
+  const max = Math.max(1, ...values);
+  const stepX = values.length>1 ? (w-pad*2)/(values.length-1) : 0;
+  const pts = values.map((v,i)=>{ const x = pad + i*stepX; const y = h-pad - (v/max)*(h-pad*2); return [x,y]; });
+  const path = pts.map((p,i)=> (i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const area = path + ` L${pts[pts.length-1]?.[0]||pad},${h-pad} L${pad},${h-pad} Z`;
+  const dots = pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="${color}"/>`).join('');
+  return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}">
+    <path d="${area}" fill="${color}" opacity="0.12"></path>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    ${dots}
+    <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="var(--border)" stroke-width="1"></line>
+  </svg>`;
+}
+function svgBarChart(values, labels, color){
+  const w=560,h=170,pad=26;
+  const max = Math.max(1, ...values);
+  const bw = (w-pad*2)/values.length;
+  const bars = values.map((v,i)=>{
+    const bh = (v/max)*(h-pad*2); const x = pad + i*bw + bw*0.15; const y = h-pad-bh;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.7).toFixed(1)}" height="${bh.toFixed(1)}" rx="3" fill="${color}"></rect>`;
+  }).join('');
+  return `<svg class="chart-svg" viewBox="0 0 ${w} ${h}">${bars}<line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="var(--border)" stroke-width="1"></line></svg>`;
+}
+
+function renderSettings(){
+  document.getElementById('set-name').value = state.player.name;
+  const statSelForAction = document.getElementById('new-act-stat');
+  if(statSelForAction && statSelForAction.options.length<=1){
+    statSelForAction.innerHTML = '<option value="">Không</option>' + STAT_DEFS.map(d=>`<option value="${d.key}">${d.icon} ${d.name}</option>`).join('');
+  }
+  document.getElementById('set-dark').checked = state.settings.theme==='dark';
+  document.getElementById('set-anim').checked = state.settings.animation;
+  document.getElementById('set-confetti').checked = state.settings.confetti;
+  document.getElementById('set-sound').checked = state.settings.sound;
+  document.getElementById('action-config-list').innerHTML = state.actionDefs.map(a => `
+    <div class="action-config-row" style="grid-template-columns:.5fr 1.3fr .7fr .7fr .6fr;">
+      <input type="text" maxlength="2" value="${a.icon||'⭐'}" data-k="${a.key}" data-f="icon" style="text-align:center;">
+      <input type="text" value="${escapeHtml(a.name)}" data-k="${a.key}" data-f="name">
+      <input type="number" min="1" value="${a.xp}" data-k="${a.key}" data-f="xp">
+      <input type="number" min="0" value="${a.limit||0}" data-k="${a.key}" data-f="limit">
+      <label style="display:flex; align-items:center; gap:4px; font-size:11px; justify-content:center;">
+        <input type="checkbox" data-k="${a.key}" data-f="enabled" ${a.enabled!==false?'checked':''} style="width:15px;height:15px;">Bật
+      </label>
+    </div>`).join('');
+  renderCategoryConfig();
+  document.getElementById('storage-warning').style.display = storageOK ? 'none' : 'block';
+}
+function renderCategoryConfig(){
+  const el = document.getElementById('category-config-list');
+  if(!el) return;
+  el.innerHTML = state.customCategories.length ? state.customCategories.map(c => `
+    <span class="tag" style="display:inline-flex; align-items:center; gap:6px; margin:0 6px 6px 0;">${c.icon||'🏷️'} ${escapeHtml(c.name)}
+      <button class="iconbtn" style="width:18px;height:18px;font-size:10px;" onclick="removeCategory('${c.key}')">✕</button>
+    </span>`).join('') : `<span class="small-note">Chưa có category tùy chỉnh nào.</span>`;
+}
+function addCategory(){
+  const name = document.getElementById('new-cat-name').value.trim();
+  const icon = document.getElementById('new-cat-icon').value.trim() || '🏷️';
+  if(!name){ toast('⚠️ Thiếu tên', 'Vui lòng nhập tên category', null); return; }
+  const key = 'custom_'+uid();
+  state.customCategories.push({key, name, icon});
+  document.getElementById('new-cat-name').value='';
+  save(); renderCategoryConfig();
+  toast('✅ Đã thêm', `Category "${name}" đã sẵn sàng dùng cho Quest`, null);
+}
+function removeCategory(key){
+  state.customCategories = state.customCategories.filter(c=>c.key!==key);
+  save(); renderCategoryConfig();
+}
+function restoreDefaultActions(){
+  openConfirm('Khôi phục Quick Actions mặc định?', 'Các chỉnh sửa hiện tại (XP, icon, giới hạn, bật/tắt) sẽ được đặt lại về mặc định. Lịch sử hoạt động không bị mất.', ()=>{
+    state.actionDefs = JSON.parse(JSON.stringify(DEFAULT_ACTIONS));
+    save(); renderSettings(); closeModal('confirm-modal');
+    toast('🔄 Đã khôi phục', 'Quick Actions đã trở về mặc định', null);
+  });
+}
+function addCustomAction(){
+  const name = document.getElementById('new-act-name').value.trim();
+  const icon = document.getElementById('new-act-icon').value.trim() || '⭐';
+  const xp = Math.max(1, Number(document.getElementById('new-act-xp').value)||10);
+  const limit = Math.max(0, Number(document.getElementById('new-act-limit').value)||0);
+  const statKey = document.getElementById('new-act-stat').value;
+  if(!name){ toast('⚠️ Thiếu tên', 'Vui lòng nhập tên hành động', null); return; }
+  state.actionDefs.push({key:'custom_'+uid(), name, icon, xp, limit, stats: statKey? {[statKey]:1} : {}, enabled:true});
+  document.getElementById('new-act-name').value='';
+  save(); renderSettings();
+  toast('✅ Đã thêm Quick Action', name, null);
+}
+function saveName(){ state.player.name = document.getElementById('set-name').value.trim() || 'MY CHARACTER'; save(); renderAll(); toast('✅ Saved', 'Character name updated', null); }
+function toggleTheme(){
+  state.settings.theme = document.getElementById('set-dark').checked ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', state.settings.theme);
+  save();
+}
+function saveToggle(key){
+  state.settings[key] = document.getElementById('set-'+ (key==='animation'?'anim':key)).checked;
+  save();
+}
+function saveActionConfig(){
+  document.querySelectorAll('#action-config-list input').forEach(inp => {
+    const def = state.actionDefs.find(a=>a.key===inp.dataset.k);
+    if(!def) return;
+    if(inp.dataset.f==='xp') def.xp = Math.max(1, Number(inp.value)||1);
+    else if(inp.dataset.f==='limit') def.limit = Math.max(0, Number(inp.value)||0);
+    else if(inp.dataset.f==='icon') def.icon = inp.value.trim() || '⭐';
+    else if(inp.dataset.f==='name') def.name = inp.value.trim() || def.name;
+    else if(inp.dataset.f==='enabled') def.enabled = inp.checked;
+  });
+  save(); renderAll();
+  toast('✅ Saved', 'Đã cập nhật cấu hình hành động', null);
+}
+
+function renderAll(){
+  renderHUD();
+  renderPage(currentPage);
+  renderNav();
+}
+function renderPage(page){
+  if(page==='dashboard') renderDashboard();
+  else if(page==='quests') renderQuests();
+  else if(page==='character') renderCharacterPage();
+  else if(page==='collection') renderCollectionPage();
+  else if(page==='journey') renderJourney();
+  else if(page==='dailylog') renderDailyLog();
+  else if(page==='rewards') renderRewards();
+  else if(page==='progress') renderProgress();
+  else if(page==='settings') renderSettings();
+}
+
+/* ---------- Character page ---------- */
+let characterTab = 'avatar';
+function renderCharacterPage(){
+  const tabs = [{key:'avatar',label:'🧙 Avatar'},{key:'stats',label:'📊 Stats'},{key:'achievements',label:'🏆 Achievements'}];
+  document.getElementById('character-tabs').innerHTML = tabs.map(t=>`<button class="range-tab ${characterTab===t.key?'active':''}" onclick="setCharacterTab('${t.key}')">${t.label}</button>`).join('');
+  document.getElementById('character-tab-avatar').style.display = characterTab==='avatar' ? '' : 'none';
+  document.getElementById('character-tab-stats').style.display = characterTab==='stats' ? '' : 'none';
+  document.getElementById('character-tab-achievements').style.display = characterTab==='achievements' ? '' : 'none';
+  renderAvatar();
+  renderEquipSlots();
+  renderStatsPage();
+  renderAchievementsPage();
+}
+function setCharacterTab(t){ characterTab = t; renderCharacterPage(); }
+
+function getEquippedDef(slot){
+  const id = state.equipped[slot];
+  return COLLECTION_DEFS.find(d=>d.id===id);
+}
+function renderAvatar(){
+  const hair = getEquippedDef('hair'), outfit = getEquippedDef('outfit'), acc = getEquippedDef('accessory'), pet = getEquippedDef('pet'), aura = getEquippedDef('aura'), title = getEquippedDef('title');
+  const auraGlow = (aura && aura.id!=='aura_none') ? `<div class="avatar-aura-glow" style="box-shadow:0 0 26px 10px ${aura.id==='aura_gold'?'rgba(217,164,65,.45)':'rgba(140,140,180,.4)'}"></div>` : '';
+  document.getElementById('avatar-stage').innerHTML = `
+    ${auraGlow}
+    <div class="avatar-base">🧙</div>
+    ${hair && hair.id!=='hair_default' ? `<div class="avatar-badge hair">${hair.icon}</div>` : ''}
+    ${outfit && outfit.id!=='outfit_default' ? `<div class="avatar-badge outfit">${outfit.icon}</div>` : ''}
+    ${acc && acc.id!=='acc_none' ? `<div class="avatar-badge accessory">${acc.icon}</div>` : ''}
+    ${pet && pet.id!=='pet_none' ? `<div class="avatar-badge pet">${pet.icon}</div>` : ''}
+  `;
+  document.getElementById('avatar-name-display').textContent = state.player.name;
+  document.getElementById('avatar-title-display').textContent = title ? title.name : '';
+}
+function renderEquipSlots(){
+  const slotMeta = [{key:'hair',label:'Hair',icon:'💇'},{key:'outfit',label:'Outfit',icon:'👕'},{key:'accessory',label:'Accessory',icon:'💍'},{key:'pet',label:'Pet',icon:'🐾'},{key:'aura',label:'Aura',icon:'✨'},{key:'title',label:'Title',icon:'🏷️'}];
+  document.getElementById('equip-slots').innerHTML = slotMeta.map(s => {
+    const owned = state.collection.filter(c=>c.unlocked).map(c=>COLLECTION_DEFS.find(d=>d.id===c.id)).filter(d=>d && d.type===s.key);
+    const options = owned.map(d=>`<option value="${d.id}" ${state.equipped[s.key]===d.id?'selected':''}>${d.icon} ${d.name}</option>`).join('');
+    return `<div class="equip-slot-row">
+      <span class="esn">${s.icon} ${s.label}</span>
+      <select class="equip-select" onchange="equipItem(this.value)">${options}</select>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- Collection page ---------- */
+let collectionFilter = 'all';
+function renderCollectionPage(){
+  const tabs = [{key:'all',label:'All'}, ...COLLECTION_TYPES.map(t=>({key:t.key,label:t.icon+' '+t.label}))];
+  document.getElementById('collection-type-tabs').innerHTML = tabs.map(t=>`<button class="range-tab ${collectionFilter===t.key?'active':''}" onclick="setCollectionFilter('${t.key}')">${t.label}</button>`).join('');
+  let defs = collectionFilter==='all' ? COLLECTION_DEFS : COLLECTION_DEFS.filter(d=>d.type===collectionFilter);
+  document.getElementById('collection-list').innerHTML = defs.map(d => {
+    const rec = state.collection.find(c=>c.id===d.id);
+    const unlocked = rec && rec.unlocked;
+    const equipped = state.equipped[d.type] === d.id;
+    return `<div class="collection-card ${unlocked?'':'locked'}">
+      <div class="collection-ic">${unlocked ? d.icon : '🔒'}</div>
+      <div class="collection-name">${unlocked ? d.name : '???'}</div>
+      <div class="collection-source">${unlocked ? (rec.unlockedAt? 'Nhận '+rec.unlockedAt : d.source) : 'Nguồn: '+d.source}</div>
+      ${unlocked ? `<button class="btn ${equipped?'btn-sage':'btn-ghost'} btn-sm" style="margin-top:8px; width:100%; justify-content:center;" onclick="equipItem('${d.id}')" ${equipped?'disabled':''}>${equipped?'Đang trang bị':'Trang bị'}</button>` : ''}
+    </div>`;
+  }).join('');
+}
+function setCollectionFilter(f){ collectionFilter=f; renderCollectionPage(); }
+
+/* ---------- Adventure widget (dashboard) ---------- */
+function renderAdventureWidget(){
+  const adv = state.adventure;
+  document.getElementById('adv-rolls-tag').textContent = `🎲 ${adv.rollsAvailable} lượt tung`;
+  document.getElementById('board-track').innerHTML = BOARD_TILES.map((tile,i) => `
+    <div class="board-tile ${i===adv.boardPosition?'current':''}"><span class="bt-idx">${i+1}</span>${tile.icon}</div>
+  `).join('');
+  const btn = document.getElementById('roll-btn');
+  btn.disabled = adv.rollsAvailable <= 0;
+  btn.textContent = adv.rollsAvailable>0 ? `Tung xúc xắc (${adv.rollsAvailable})` : 'Chưa có lượt tung';
+  const t = todayStr();
+  const log = state.dailyLogs[t] || {questsCompleted:0};
+  const done = log.questsCompleted || 0;
+  document.getElementById('adv-progress-note').textContent = done>=5 ? 'Đã mở tối đa lượt từ Quest hôm nay!' : `Đã hoàn thành ${done}/${done<3?3:5} quest hôm nay`;
+}
+
+/* =========================================================
+   Modals, toasts, celebration
+   ========================================================= */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function questCategoryOptionsHtml(){
+  const stats = STAT_DEFS.map(d=>`<option value="${d.key}">${d.icon} ${d.name}</option>`).join('');
+  const customs = state.customCategories.map(c=>`<option value="${c.key}">${c.icon} ${c.name}</option>`).join('');
+  return stats + customs;
+}
+function openQuestModal(){
+  document.getElementById('quest-modal-title').textContent = 'Add Quest';
+  document.getElementById('quest-id').value = '';
+  document.getElementById('q-name').value = '';
+  document.getElementById('q-desc').value = '';
+  document.getElementById('q-type').value = 'daily';
+  document.getElementById('q-diff').value = '2';
+  document.getElementById('q-stat').innerHTML = questCategoryOptionsHtml();
+  document.getElementById('q-xp').value = 20;
+  document.getElementById('q-deadline').value = '';
+  document.getElementById('q-recurring').checked = true;
+  document.getElementById('q-resource').value = '';
+  openModal('quest-modal');
+}
+function editQuestPrompt(id){
+  const q = state.quests.find(x=>x.id===id); if(!q) return;
+  document.getElementById('quest-modal-title').textContent = 'Edit Quest';
+  document.getElementById('quest-id').value = q.id;
+  document.getElementById('q-name').value = q.name;
+  document.getElementById('q-desc').value = q.description||'';
+  document.getElementById('q-type').value = q.type;
+  document.getElementById('q-diff').value = q.difficulty;
+  const statSel = document.getElementById('q-stat');
+  statSel.innerHTML = questCategoryOptionsHtml();
+  statSel.value = q.category;
+  document.getElementById('q-xp').value = q.xp;
+  document.getElementById('q-deadline').value = q.deadline||'';
+  document.getElementById('q-recurring').checked = !!q.recurring;
+  document.getElementById('q-resource').value = q.resource||'';
+  openModal('quest-modal');
+}
+function duplicateQuest(id){
+  const q = state.quests.find(x=>x.id===id); if(!q) return;
+  const copy = JSON.parse(JSON.stringify(q));
+  copy.id = uid(); copy.name = q.name + ' (copy)'; copy.status='active'; copy.completedDates=[]; copy.createdAt = todayStr();
+  state.quests.push(copy);
+  save(); renderAll();
+  toast('📋 Đã nhân bản', copy.name, null);
+}
+function syncQuestXP(){
+  const diff = document.getElementById('q-diff').value;
+  document.getElementById('q-xp').value = DIFF_DEFS[diff].xp;
+}
+function submitQuest(){
+  const name = document.getElementById('q-name').value.trim();
+  if(!name){ toast('⚠️ Thiếu tên', 'Vui lòng nhập tên nhiệm vụ', null); return; }
+  const data = {
+    name, description: document.getElementById('q-desc').value.trim(),
+    type: document.getElementById('q-type').value, difficulty: document.getElementById('q-diff').value,
+    category: document.getElementById('q-stat').value, xp: Math.max(1, Number(document.getElementById('q-xp').value)||10),
+    deadline: document.getElementById('q-deadline').value || null, recurring: document.getElementById('q-recurring').checked,
+    resource: document.getElementById('q-resource').value.trim(),
+  };
+  const id = document.getElementById('quest-id').value;
+  if(id) updateQuest(id, data); else addQuest(data);
+  closeModal('quest-modal');
+  toast('✅ Quest Saved', name, null);
+}
+function confirmDeleteQuest(id){
+  openConfirm('Xóa nhiệm vụ?', 'Bạn có chắc muốn xóa nhiệm vụ này? Hành động không thể hoàn tác.', ()=>{ deleteQuest(id); closeModal('confirm-modal'); });
+}
+
+function openRewardModal(){
+  document.getElementById('r-name').value=''; document.getElementById('r-desc').value='';
+  document.getElementById('r-icon').value='🎁'; document.getElementById('r-cost').value=100;
+  openModal('reward-modal');
+}
+function submitReward(){
+  const name = document.getElementById('r-name').value.trim();
+  if(!name){ toast('⚠️ Thiếu tên', 'Vui lòng nhập tên phần thưởng', null); return; }
+  addReward({name, desc:document.getElementById('r-desc').value.trim(), icon:document.getElementById('r-icon').value.trim()||'🎁', cost:Number(document.getElementById('r-cost').value)||100});
+  closeModal('reward-modal');
+}
+
+function openConfirm(title, body, onConfirm){
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-body').textContent = body;
+  const btn = document.getElementById('confirm-btn');
+  const newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);
+  newBtn.addEventListener('click', onConfirm);
+  openModal('confirm-modal');
+}
+
+let toastTimer = null;
+function toast(title, body, kind){
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<div class="tt">${title}</div>${body? `<div class="${kind==='xp'?'xpline':''}" style="white-space:pre-line;">${escapeHtml(body)}</div>` : ''}`;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.animation = 'toastout .3s ease forwards'; setTimeout(()=> el.remove(), 300); }, 2600);
+}
+
+function triggerLevelUp(oldLevel, newLevel, coinGain){
+  showCelebrate('🎉', 'LEVEL UP!', `Bạn đã đạt Level ${newLevel}! +${coinGain||0} 🪙`, null);
+  if(state.settings.confetti !== false) launchConfetti();
+}
+function showCelebrate(emoji, title, sub, icon){
+  document.getElementById('celebrate-emoji').textContent = icon||emoji;
+  document.getElementById('celebrate-title').textContent = title;
+  document.getElementById('celebrate-sub').textContent = sub||'';
+  openModal2();
+}
+function openModal2(){ document.getElementById('celebrate-overlay').classList.add('open'); }
+function closeCelebrate(){
+  document.getElementById('celebrate-overlay').classList.remove('open');
+  if(achievementQueue.length>0){ setTimeout(()=>flushAchievementQueue(),250); }
+}
+function launchConfetti(){
+  if(state.settings.animation===false) return;
+  const colors = ['#D9A441','#7C9A83','#C97F80','#6F92AD','#7C6A96'];
+  for(let i=0;i<26;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100+'vw';
+    p.style.background = colors[i%colors.length];
+    p.style.transform = `rotate(${Math.random()*360}deg)`;
+    p.style.animation = `confettifall ${1.4+Math.random()*1.2}s ease-in forwards`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 3000);
+  }
+}
+const confettiStyle = document.createElement('style');
+confettiStyle.textContent = `@keyframes confettifall{ to{ transform:translateY(100vh) rotate(400deg); opacity:0.2; } }`;
+document.head.appendChild(confettiStyle);
+
+/* =========================================================
+   Data export / import / reset
+   ========================================================= */
+function exportData(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `life-rpg-backup-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('💾 Exported', 'Đã tải file backup JSON', null);
+}
+function importData(evt){
+  const file = evt.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!parsed || !parsed.player || !parsed.stats) throw new Error('invalid');
+      state = parsed;
+      save(); document.documentElement.setAttribute('data-theme', state.settings.theme||'light');
+      renderAll();
+      toast('✅ Imported', 'Dữ liệu đã được khôi phục', null);
+    }catch(e){
+      toast('❌ Import thất bại', 'File JSON không hợp lệ. Dữ liệu hiện tại được giữ nguyên.', null);
+    }
+  };
+  reader.readAsText(file);
+  evt.target.value = '';
+}
+function startFresh(){
+  openConfirm('Bắt đầu lại từ đầu?', 'Toàn bộ dữ liệu mẫu sẽ bị xóa và bạn bắt đầu từ Level 1. Tiến trình hiện tại (nếu có) cũng sẽ mất.', ()=>{
+    state = freshState(false);
+    document.documentElement.setAttribute('data-theme', state.settings.theme);
+    save(); renderAll(); closeModal('confirm-modal');
+    toast('🌱 Bắt đầu mới', 'Chúc bạn có một hành trình tuyệt vời!', null);
+    document.getElementById('ob-goals').innerHTML = STAT_DEFS.map(d => `<label class="chk-item"><input type="checkbox" value="${d.key}"> ${d.icon} ${d.name}</label>`).join('');
+    document.getElementById('ob-name').value = '';
+    setTimeout(()=>openModal('onboarding-modal'), 300);
+  });
+}
+let resetStep = 0;
+function resetDataStep1(){
+  openConfirm('Xóa toàn bộ dữ liệu? (1/2)', 'Bạn chắc chắn muốn xóa toàn bộ tiến trình? Hành động này không thể hoàn tác.', ()=>{
+    closeModal('confirm-modal');
+    setTimeout(resetDataStep2, 200);
+  });
+}
+function resetDataStep2(){
+  openConfirm('Xác nhận lần cuối (2/2)', 'Đây là lần xác nhận cuối cùng. Toàn bộ Level, Quest, Achievement và lịch sử sẽ bị xóa vĩnh viễn.', ()=>{
+    state = freshState(false);
+    document.documentElement.setAttribute('data-theme', state.settings.theme);
+    save(); renderAll(); closeModal('confirm-modal');
+    toast('🗑️ Đã xóa', 'Dữ liệu đã được reset hoàn toàn', null);
+    document.getElementById('ob-goals').innerHTML = STAT_DEFS.map(d => `<label class="chk-item"><input type="checkbox" value="${d.key}"> ${d.icon} ${d.name}</label>`).join('');
+    document.getElementById('ob-name').value = '';
+    setTimeout(()=>openModal('onboarding-modal'), 300);
+  });
+}
+
+/* =========================================================
+   Init
+   ========================================================= */
+function init(){
+  document.documentElement.setAttribute('data-theme', state.settings.theme||'light');
+  renderNav();
+  navigate('dashboard');
+  if(!state.onboarding || !state.onboarding.done){
+    document.getElementById('ob-goals').innerHTML = STAT_DEFS.map(d => `
+      <label class="chk-item"><input type="checkbox" value="${d.key}"> ${d.icon} ${d.name}</label>
+    `).join('');
+    document.getElementById('ob-name').value = state.player.name==='MY CHARACTER' ? '' : state.player.name;
+    openModal('onboarding-modal');
+  }
+  if(!storageOK){
+    setTimeout(()=> toast('⚠️ Lưu ý', 'Trình duyệt không hỗ trợ lưu dữ liệu cục bộ. Tiến trình sẽ không được lưu lại.', null), 600);
+  }
+}
+init();
+</script>
+</body>
+</html>
